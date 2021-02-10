@@ -109,8 +109,10 @@ int main(int const argc, char const* const argv[])
 					bsOut.Write("Welcome client!");
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 
-					bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_GAME_MESSAGE_1) + sizeof(RakNet::RakString)];
-					bufIndex += sizeof((RakNet::MessageID)ID_GAME_MESSAGE_1) + sizeof(RakNet::RakString);
+					printf("Size of messageID is %zi", sizeof(RakNet::MessageID));
+					printf("Size of string is %zi", sizeof(rs));
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + sizeof(rs)];
+					bufIndex += sizeof((RakNet::MessageID)ID_GAME_MESSAGE_1) + sizeof(rs);
 				}
 				break;
 				case ID_TIMESTAMP:

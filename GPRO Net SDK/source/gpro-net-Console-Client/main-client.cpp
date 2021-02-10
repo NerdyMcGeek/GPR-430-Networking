@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <Windows.h>
 
 #include "RakNet/RakPeerInterface.h"
 #include "RakNet/MessageIdentifiers.h"
@@ -68,6 +68,14 @@ int main(int const argc, char const* const argv[])
 
 	while (1)
 	{
+		if (GetKeyState(VK_SPACE) & 0x8000)
+		{
+			printf("Enter message:\n");
+			char message[100];
+			scanf("%s", message);
+			printf("%s\n", message);
+		}
+
 		for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
 		{
 			switch (packet->data[0])
@@ -81,6 +89,8 @@ int main(int const argc, char const* const argv[])
 
 				bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
 				bsOut.Write(timeStamp);
+
+				//TODO: Write username
 
 				bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
 				bsOut.Write("Hello world");
