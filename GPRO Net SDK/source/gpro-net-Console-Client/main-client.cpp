@@ -52,11 +52,12 @@ int main(int const argc, char const* const argv[])
 
 	RakNet::SocketDescriptor sd;
 	peer->Startup(1, &sd, 1);
+	peer->SetOccasionalPing(true);
 
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "127.0.0.1");
+		strcpy(str, "172.16.2.62");
 	}
 
 	printf("Enter a username. No spaces\n");
