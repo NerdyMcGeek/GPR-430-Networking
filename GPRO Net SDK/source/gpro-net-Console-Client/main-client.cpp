@@ -40,7 +40,8 @@
 
 enum GameMessages
 {
-	ID_GAME_MESSAGE_1=ID_USER_PACKET_ENUM+1
+	ID_GAME_MESSAGE_1=ID_USER_PACKET_ENUM+1,
+	ID_GAME_MESSAGE_2
 };
 
 int main(int const argc, char const* const argv[])
@@ -49,6 +50,7 @@ int main(int const argc, char const* const argv[])
 	char un[512];
 	RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
 	RakNet::Packet* packet;
+	RakNet::SystemAddress sysAddress;
 
 	RakNet::SocketDescriptor sd;
 	peer->Startup(1, &sd, 1);
@@ -57,7 +59,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.62");
+		strcpy(str, "172.16.2.60");
 	}
 
 	printf("Enter a username. No spaces\n");
@@ -74,6 +76,24 @@ int main(int const argc, char const* const argv[])
 			char message[100];
 			scanf("%s", message);
 			printf("%s\n", message);
+
+			RakNet::BitStream bsOut;
+			RakNet::Time ts = RakNet::GetTime();
+			RakNet::RakString rs = message;
+
+			bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
+			bsOut.Write(ts);
+
+			//TODO: Write username
+
+			bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_2);
+			bsOut.Write(rs);
+
+			//packet = peer->Receive();
+			//printf("%s\n", sysAddress.ToString());
+			peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, sysAddress, false);
+
+			//printf("message sent\n");
 		}
 
 		for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
@@ -83,6 +103,8 @@ int main(int const argc, char const* const argv[])
 			case ID_CONNECTION_REQUEST_ACCEPTED:
 			{
 				printf("Our connection request has been accepted.\n");
+
+				sysAddress = packet->systemAddress;
 
 				RakNet::BitStream bsOut;
 				RakNet::Time timeStamp = RakNet::GetTime();

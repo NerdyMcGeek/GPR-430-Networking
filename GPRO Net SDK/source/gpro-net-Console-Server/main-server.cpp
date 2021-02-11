@@ -40,7 +40,8 @@
 
 enum GameMessages
 {
-	ID_GAME_MESSAGE_1 = ID_USER_PACKET_ENUM + 1
+	ID_GAME_MESSAGE_1 = ID_USER_PACKET_ENUM + 1,
+	ID_GAME_MESSAGE_2
 };
 
 int main(int const argc, char const* const argv[])
@@ -72,15 +73,19 @@ int main(int const argc, char const* const argv[])
 				{
 				case ID_REMOTE_DISCONNECTION_NOTIFICATION:
 					printf("Another client has disconnected.\n");
+					bufPtr = NULL;
 					break;
 				case ID_REMOTE_CONNECTION_LOST:
 					printf("Another client has lost the connection.\n");
+					bufPtr = NULL;
 					break;
 				case ID_REMOTE_NEW_INCOMING_CONNECTION:
 					printf("Another client has connected.\n");
+					bufPtr = NULL;
 					break;
 				case ID_CONNECTION_REQUEST_ACCEPTED:
 					printf("Our connection request has been accepted.\n");
+					bufPtr = NULL;
 					break;
 				case ID_NEW_INCOMING_CONNECTION:
 					printf("A connection is incoming.\n");
@@ -88,12 +93,15 @@ int main(int const argc, char const* const argv[])
 					break;
 				case ID_NO_FREE_INCOMING_CONNECTIONS:
 					printf("The server is full.\n");
+					bufPtr = NULL;
 					break;
 				case ID_DISCONNECTION_NOTIFICATION:
 					printf("A client has disconnected.\n");
+					bufPtr = NULL;
 					break;
 				case ID_CONNECTION_LOST:
 					printf("A client lost the connection.\n");
+					bufPtr = NULL;
 					break;
 				case ID_GAME_MESSAGE_1:
 				{
@@ -109,10 +117,21 @@ int main(int const argc, char const* const argv[])
 					bsOut.Write("Welcome client!");
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 
-					printf("Size of messageID is %zi", sizeof(RakNet::MessageID));
-					printf("Size of string is %zi", sizeof(rs));
+					//printf("Size of messageID is %zi", sizeof(RakNet::MessageID));
+					//printf("Size of string is %zi", sizeof(rs));
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + sizeof(rs)];
 					bufIndex += sizeof((RakNet::MessageID)ID_GAME_MESSAGE_1) + sizeof(rs);
+				}
+				break;
+				case ID_GAME_MESSAGE_2:
+				{
+					RakNet::RakString rs;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(rs);
+
+					printf("%s\n", rs.C_String());
+					bufPtr = NULL;
 				}
 				break;
 				case ID_TIMESTAMP:
