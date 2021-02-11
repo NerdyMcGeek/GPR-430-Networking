@@ -57,6 +57,13 @@ int main(int const argc, char const* const argv[])
 	printf("Starting the server.\n");
 	peer->SetMaximumIncomingConnections(MAX_CLIENTS);
 
+	FILE* logFile = fopen("messageLog.txt", "w");
+	if (logFile == NULL)
+	{
+		printf("Could not open file");
+	}
+	// ^ this saves in a weird place. users/[user]/remote/reponame/bin
+
 	//Always running loop to receive packets
 	while (1)
 	{
@@ -98,10 +105,12 @@ int main(int const argc, char const* const argv[])
 					break;
 				case ID_DISCONNECTION_NOTIFICATION:
 					printf("A client has disconnected.\n");
+					fclose(logFile);
 					bufPtr = NULL;
 					break;
 				case ID_CONNECTION_LOST:
 					printf("A client lost the connection.\n");
+					fclose(logFile);
 					bufPtr = NULL;
 					break;
 				case ID_GAME_MESSAGE_1:
@@ -111,7 +120,10 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					printf("%s ", rs.C_String());
+					printf("%s\n", rs.C_String());
+					//send message to log
+					fprintf(logFile, "%s\n", rs.C_String());
+					//fclose(logFile);
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
@@ -147,7 +159,8 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(ts);
 
-					printf("\n%" PRINTF_64_BIT_MODIFIER "u ", ts);
+					printf("%" PRINTF_64_BIT_MODIFIER "u ", ts);
+					//send timestamp to log (?)
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
@@ -187,6 +200,8 @@ int main(int const argc, char const* const argv[])
 	}
 
 	RakNet::RakPeerInterface::DestroyInstance(peer);
+
+	fclose(logFile);
 
 	printf("\n\n");
 	system("pause");
