@@ -38,10 +38,13 @@
 
 #define SERVER_PORT 60000
 
+const int MAX_MESSAGE_SZ = 256;
+
 enum GameMessages
 {
 	ID_GAME_MESSAGE_1=ID_USER_PACKET_ENUM+1,
-	ID_GAME_MESSAGE_2
+	ID_CHAT_MESSAGE,
+	ID_USERNAME
 };
 
 int main(int const argc, char const* const argv[])
@@ -59,7 +62,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.60");
+		strcpy(str, "172.16.2.62");
 	}
 
 	printf("Enter a username. No spaces\n");
@@ -73,74 +76,127 @@ int main(int const argc, char const* const argv[])
 		if (GetKeyState(VK_SPACE) & 0x8000)
 		{
 			printf("Enter message:\n");
-			char message[100];
-			scanf("%s", message);
-			printf("%s\n", message);
+			char message[MAX_MESSAGE_SZ];
+			fgets(message, MAX_MESSAGE_SZ, stdin);
 
 			RakNet::BitStream bsOut;
-			RakNet::Time ts = RakNet::GetTime();
-			RakNet::RakString rs = message;
+			RakNet::Time timestamp = RakNet::GetTime();
+			RakNet::RakString username = un;
+			RakNet::RakString chatMessage = message;
 
 			bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
-			bsOut.Write(ts);
+			bsOut.Write(timestamp);
 
-			//TODO: Write username
+			bsOut.Write((RakNet::MessageID)ID_USERNAME);
+			bsOut.Write(username);
 
-			bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_2);
-			bsOut.Write(rs);
+			bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
+			bsOut.Write(chatMessage);
 
-			//packet = peer->Receive();
-			//printf("%s\n", sysAddress.ToString());
 			peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, sysAddress, false);
-
-			//printf("message sent\n");
 		}
 
 		for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
 		{
-			switch (packet->data[0])
+			unsigned int bufIndex = 0;
+			unsigned char bufPtr = packet->data[bufIndex];
+			RakNet::BitStream bsIn(packet->data, packet->length, false);
+
+			while (bufPtr != NULL)
 			{
-			case ID_CONNECTION_REQUEST_ACCEPTED:
-			{
-				printf("Our connection request has been accepted.\n");
+				switch (packet->data[0])
+				{
+				case ID_CONNECTION_REQUEST_ACCEPTED:
+				{
+					printf("Our connection request has been accepted.\n");
 
-				sysAddress = packet->systemAddress;
+					sysAddress = packet->systemAddress;
 
-				RakNet::BitStream bsOut;
-				RakNet::Time timeStamp = RakNet::GetTime();
+					RakNet::BitStream bsOut;
+					RakNet::Time timestamp = RakNet::GetTime();
+					RakNet::RakString username = un;
 
-				bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
-				bsOut.Write(timeStamp);
+					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
+					bsOut.Write(timestamp);
 
-				//TODO: Write username
+					bsOut.Write((RakNet::MessageID)ID_USERNAME);
+					bsOut.Write(username);
 
-				bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
-				bsOut.Write("Hello world");
+					bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
+					bsOut.Write("Hello world");
 
-				peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
-			}
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+
+					bufPtr = NULL;
+				}
 				break;
-			case ID_NO_FREE_INCOMING_CONNECTIONS:
-				printf("The server is full.\n");
+				case ID_NO_FREE_INCOMING_CONNECTIONS:
+					printf("The server is full.\n");
+					bufPtr = NULL;
+					break;
+				case ID_DISCONNECTION_NOTIFICATION:
+					printf("A client has disconnected.\n");
+					bufPtr = NULL;
+					break;
+				case ID_CONNECTION_LOST:
+					printf("A client lost the connection.\n");
+					bufPtr = NULL;
+					break;
+				case ID_GAME_MESSAGE_1:
+				{
+					RakNet::RakString rs;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(rs);
+					printf("%s\n", rs.C_String());
+
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
+					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
 				break;
-			case ID_DISCONNECTION_NOTIFICATION:
-				printf("A client has disconnected.\n");
+				case ID_CHAT_MESSAGE:
+				{
+					RakNet::RakString rs;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(rs);
+
+					printf("%s ", rs.C_String());
+
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
+					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
 				break;
-			case ID_CONNECTION_LOST:
-				printf("A client lost the connection.\n");
+				case ID_TIMESTAMP:
+				{
+					RakNet::Time ts;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(ts);
+
+					printf("\n%" PRINTF_64_BIT_MODIFIER "u ", ts);
+
+					bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time)];
+					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
+				}
 				break;
-			case ID_GAME_MESSAGE_1:
-			{
-				RakNet::RakString rs;
-				RakNet::BitStream bsIn(packet->data, packet->length, false);
-				bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
-				bsIn.Read(rs);
-				printf("%s\n", rs.C_String());
-			}
+				case ID_USERNAME:
+				{
+					RakNet::RakString rs;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(rs);
+
+					printf("%s ", rs.C_String());
+
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
+					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
 				break;
-			default:
-				printf("Message with identifier %i has arrived.\n", packet->data[0]);
-				break;
+				default:
+					printf("Message with identifier %i has arrived.\n", packet->data[0]);
+					break;
+				}
 			}
 		}
 	}

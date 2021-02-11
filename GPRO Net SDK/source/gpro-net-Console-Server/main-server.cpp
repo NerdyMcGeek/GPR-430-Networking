@@ -41,7 +41,8 @@
 enum GameMessages
 {
 	ID_GAME_MESSAGE_1 = ID_USER_PACKET_ENUM + 1,
-	ID_GAME_MESSAGE_2
+	ID_CHAT_MESSAGE,
+	ID_USERNAME
 };
 
 int main(int const argc, char const* const argv[])
@@ -110,28 +111,33 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					printf("%s\n", rs.C_String());
+					printf("%s ", rs.C_String());
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
 					bsOut.Write("Welcome client!");
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 
-					//printf("Size of messageID is %zi", sizeof(RakNet::MessageID));
-					//printf("Size of string is %zi", sizeof(rs));
-					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + sizeof(rs)];
-					bufIndex += sizeof((RakNet::MessageID)ID_GAME_MESSAGE_1) + sizeof(rs);
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
+					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
-				case ID_GAME_MESSAGE_2:
+				case ID_CHAT_MESSAGE:
 				{
 					RakNet::RakString rs;
 
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					printf("%s\n", rs.C_String());
-					bufPtr = NULL;
+					printf("%s ", rs.C_String());
+
+					RakNet::BitStream bsOut;
+					bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
+					bsOut.Write(rs);
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
+					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
 				case ID_TIMESTAMP:
@@ -141,19 +147,42 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(ts);
 
-					printf("%" PRINTF_64_BIT_MODIFIER "u ", ts);
+					printf("\n%" PRINTF_64_BIT_MODIFIER "u ", ts);
+
+					RakNet::BitStream bsOut;
+					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
+					bsOut.Write(ts);
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 
 					bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time)];
 					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
 				}
 				break;
+				case ID_USERNAME:
+				{
+					RakNet::RakString rs;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(rs);
+
+					printf("%s ", rs.C_String());
+
+					RakNet::BitStream bsOut;
+					bsOut.Write((RakNet::MessageID)ID_USERNAME);
+					bsOut.Write(rs);
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
+					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
+				break;
 				default:
-					printf("Message with identifier %i has arrived.\n", bufPtr);
+					//printf("\nMessage with identifier %i has arrived.\n", bufPtr);
 					bufPtr = NULL;
 					break;
 				}
 			}
-			printf("End of packet.\n");
+			//printf("End of packet.\n");
 		}
 	}
 
