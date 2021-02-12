@@ -42,7 +42,8 @@ enum GameMessages
 {
 	ID_GAME_MESSAGE_1 = ID_USER_PACKET_ENUM + 1,
 	ID_CHAT_MESSAGE,
-	ID_USERNAME
+	ID_USERNAME,
+	ID_SHUTDOWN
 };
 
 int main(int const argc, char const* const argv[])
@@ -64,8 +65,9 @@ int main(int const argc, char const* const argv[])
 	}
 	// ^ this saves in a weird place. users/[user]/remote/reponame/bin
 
+	bool running = true;
 	//Always running loop to receive packets
-	while (1)
+	while (running)
 	{
 		//For each packet the server receives
 		for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
@@ -191,6 +193,12 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				case ID_SHUTDOWN:
+				{
+					running = false;
+					bufPtr = NULL;
+				}
+				break;
 				default:
 					//printf("\nMessage with identifier %i has arrived.\n", bufPtr);
 					bufPtr = NULL;
@@ -206,5 +214,5 @@ int main(int const argc, char const* const argv[])
 	fclose(logFile);
 
 	printf("\n\n");
-	system("pause");
+	//system("pause");
 }
