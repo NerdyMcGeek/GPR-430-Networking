@@ -94,7 +94,7 @@ int main(int const argc, char const* const argv[])
 			if (strcmp(message, shutdown) == 0)
 			{
 				bsOut.Write((RakNet::MessageID)ID_SHUTDOWN);
-				running = false;
+				//running = false;
 			}
 
 			bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);

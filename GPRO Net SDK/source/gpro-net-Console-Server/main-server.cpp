@@ -144,6 +144,7 @@ int main(int const argc, char const* const argv[])
 					bsIn.Read(rs);
 
 					printf("%s ", rs.C_String());
+					fprintf(logFile, "%s ", rs.C_String());
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
