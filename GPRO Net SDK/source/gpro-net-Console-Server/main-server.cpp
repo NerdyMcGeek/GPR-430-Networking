@@ -42,9 +42,9 @@ enum GameMessages
 {
 	ID_GAME_MESSAGE_1 = ID_USER_PACKET_ENUM + 1,
 	ID_CHAT_MESSAGE,
-	ID_USERNAME,
 	ID_JOIN_USERNAME,
-	ID_PRINT_CONNECTED_USERS
+	ID_PRINT_CONNECTED_USERS,
+	ID_SHUTDOWN
 };
 
 int main(int const argc, char const* const argv[])
@@ -68,8 +68,9 @@ int main(int const argc, char const* const argv[])
 	}
 	// ^ this saves in a weird place. users/[user]/remote/reponame/bin
 
+	bool running = true;
 	//Always running loop to receive packets
-	while (1)
+	while (running)
 	{
 		//For each packet the server receives
 		for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
@@ -146,6 +147,7 @@ int main(int const argc, char const* const argv[])
 					bsIn.Read(rs);
 
 					printf("%s ", rs.C_String());
+					fprintf(logFile, "%s ", rs.C_String());
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
@@ -165,6 +167,7 @@ int main(int const argc, char const* const argv[])
 
 					printf("%" PRINTF_64_BIT_MODIFIER "u ", ts);
 					//send timestamp to log (?)
+					fprintf(logFile, "%" PRINTF_64_BIT_MODIFIER "u ", ts);
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
@@ -183,6 +186,7 @@ int main(int const argc, char const* const argv[])
 					bsIn.Read(rs);
 
 					printf("%s ", rs.C_String());
+					fprintf(logFile, "%s ", rs.C_String());
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_USERNAME);
@@ -191,6 +195,12 @@ int main(int const argc, char const* const argv[])
 
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
+				break;
+				case ID_SHUTDOWN:
+				{
+					running = false;
+					bufPtr = NULL;
 				}
 				break;
 				case ID_JOIN_USERNAME:
@@ -242,5 +252,5 @@ int main(int const argc, char const* const argv[])
 	fclose(logFile);
 
 	printf("\n\n");
-	system("pause");
+	//system("pause");
 }

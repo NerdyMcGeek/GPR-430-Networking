@@ -44,15 +44,17 @@ enum GameMessages
 {
 	ID_GAME_MESSAGE_1=ID_USER_PACKET_ENUM+1,
 	ID_CHAT_MESSAGE,
-	ID_USERNAME,
 	ID_JOIN_USERNAME,
-	ID_PRINT_CONNECTED_USERS
+	ID_PRINT_CONNECTED_USERS,
+	ID_SHUTDOWN
 };
 
 int main(int const argc, char const* const argv[])
 {
 	char str[512];
 	char un[512];
+	char shutdown[MAX_MESSAGE_SZ] = "quitServer\n";
+
 	RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
 	RakNet::Packet* packet;
 	RakNet::SystemAddress sysAddress;
@@ -64,7 +66,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.67");
+		strcpy(str, "172.16.2.62");
 	}
 
 	printf("Enter a username. No spaces\n");
@@ -73,7 +75,9 @@ int main(int const argc, char const* const argv[])
 	printf("Connecting...\n");
 	peer->Connect(str, SERVER_PORT, 0, 0);
 
-	while (1)
+	bool running = true;
+
+	while (running)
 	{
 		if (GetKeyState(VK_SPACE) & 0x8000)
 		{
@@ -81,10 +85,18 @@ int main(int const argc, char const* const argv[])
 			char message[MAX_MESSAGE_SZ];
 			fgets(message, MAX_MESSAGE_SZ, stdin);
 
+
 			RakNet::BitStream bsOut;
 			RakNet::Time timestamp = RakNet::GetTime();
 			RakNet::RakString username = un;
 			RakNet::RakString chatMessage = message;
+
+			//check if message is server shutdown command
+			if (strcmp(message, shutdown) == 0)
+			{
+				bsOut.Write((RakNet::MessageID)ID_SHUTDOWN);
+				//running = false;
+			}
 
 			bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
 			bsOut.Write(timestamp);
