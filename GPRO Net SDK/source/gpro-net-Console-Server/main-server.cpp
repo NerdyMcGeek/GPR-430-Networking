@@ -42,6 +42,7 @@ enum GameMessages
 {
 	ID_GAME_MESSAGE_1 = ID_USER_PACKET_ENUM + 1,
 	ID_CHAT_MESSAGE,
+	ID_USERNAME,
 	ID_JOIN_USERNAME,
 	ID_PRINT_CONNECTED_USERS,
 	ID_SHUTDOWN
@@ -210,7 +211,7 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					connectedUsers.push_back(rs);
+					connectedUsers.push_back(rs + " " + packet->systemAddress.ToString() + "\n");
 
 					printf("%s ", rs.C_String());
 
@@ -220,7 +221,7 @@ int main(int const argc, char const* const argv[])
 				break;
 				case ID_PRINT_CONNECTED_USERS:
 				{
-					RakNet::RakString users = "Users: ";
+					RakNet::RakString users = "Users: \n";
 					for (int i = 0; i < connectedUsers.size(); i++)
 					{
 						users += connectedUsers.at(i) + " ";

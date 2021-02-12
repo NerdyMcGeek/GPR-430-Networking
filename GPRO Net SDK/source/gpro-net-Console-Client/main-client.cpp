@@ -44,6 +44,7 @@ enum GameMessages
 {
 	ID_GAME_MESSAGE_1=ID_USER_PACKET_ENUM+1,
 	ID_CHAT_MESSAGE,
+	ID_USERNAME,
 	ID_JOIN_USERNAME,
 	ID_PRINT_CONNECTED_USERS,
 	ID_SHUTDOWN
@@ -54,6 +55,7 @@ int main(int const argc, char const* const argv[])
 	char str[512];
 	char un[512];
 	char shutdown[MAX_MESSAGE_SZ] = "quitServer\n";
+	char clientList[MAX_MESSAGE_SZ] = "clientList\n";
 
 	RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
 	RakNet::Packet* packet;
@@ -66,7 +68,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.62");
+		strcpy(str, "172.16.2.67");
 	}
 
 	printf("Enter a username. No spaces\n");
@@ -97,15 +99,21 @@ int main(int const argc, char const* const argv[])
 				bsOut.Write((RakNet::MessageID)ID_SHUTDOWN);
 				//running = false;
 			}
+			else if (strcmp(message, clientList) == 0)
+			{
+				bsOut.Write((RakNet::MessageID)ID_PRINT_CONNECTED_USERS);
+			}
+			else
+			{
+				bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
+				bsOut.Write(timestamp);
 
-			bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
-			bsOut.Write(timestamp);
+				bsOut.Write((RakNet::MessageID)ID_USERNAME);
+				bsOut.Write(username);
 
-			bsOut.Write((RakNet::MessageID)ID_USERNAME);
-			bsOut.Write(username);
-
-			bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
-			bsOut.Write(chatMessage);
+				bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
+				bsOut.Write(chatMessage);
+			}
 
 			peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, sysAddress, false);
 		}
@@ -138,8 +146,6 @@ int main(int const argc, char const* const argv[])
 
 					bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
 					bsOut.Write("Hello world");
-
-					bsOut.Write((RakNet::MessageID)ID_PRINT_CONNECTED_USERS);
 
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 
