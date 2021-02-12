@@ -160,7 +160,7 @@ int main(int const argc, char const* const argv[])
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
 					bsOut.Write(rs);
-					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
@@ -181,7 +181,7 @@ int main(int const argc, char const* const argv[])
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
 					bsOut.Write(ts);
-					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 
 					bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time)];
 					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
@@ -201,7 +201,7 @@ int main(int const argc, char const* const argv[])
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_USERNAME);
 					bsOut.Write(rs);
-					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
