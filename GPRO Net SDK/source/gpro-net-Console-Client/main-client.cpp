@@ -29,7 +29,6 @@
 
 #include "gpro-net/gpro-net.h"
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,6 +44,7 @@
 
 const int MAX_MESSAGE_SZ = 256;
 
+//These are the custom IDs for different tasks that we made
 enum GameMessages
 {
 	ID_GAME_MESSAGE_1=ID_USER_PACKET_ENUM+1,
@@ -57,43 +57,52 @@ enum GameMessages
 
 int main(int const argc, char const* const argv[])
 {
-	char str[512];
-	char un[512];
+	char str[512]; //for the server IP
+	char un[512]; //for the client's username
+
+	//char arrays just used for comparison for user commands
 	char shutdown[MAX_MESSAGE_SZ] = "quitServer\n";
 	char clientList[MAX_MESSAGE_SZ] = "clientList\n";
 
+	//set up RakNet vars
 	RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
 	RakNet::Packet* packet;
 	RakNet::SystemAddress sysAddress;
-
 	RakNet::SocketDescriptor sd;
+
+	//start the client process
 	peer->Startup(1, &sd, 1);
 	peer->SetOccasionalPing(true);
 
+	//ask for user to enter server IP or hit ENTER for default
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.186");
+		strcpy(str, "172.16.2.64");
 	}
 
+	//ask for user to enter their username
 	printf("Enter a username. No spaces\n");
 	gets_s(un);
 
 	printf("Connecting...\n");
 	peer->Connect(str, SERVER_PORT, 0, 0);
 
+	//get a reference to THIS window
+	//thank you StackOverflow: https://stackoverflow.com/questions/18034988/checking-if-a-window-is-active
 	HWND window = GetForegroundWindow();
 
 	bool running = true;
 
 	while (running)
 	{
+		//if user presses space in the foreground window (doesn't activate other chat windows)
 		if ((GetKeyState(VK_SPACE) & 0x8000) && window == GetForegroundWindow())
 		{
+			//asks for chat message
 			printf("\nEnter message:");
 			char message[MAX_MESSAGE_SZ];
 			fgets(message, MAX_MESSAGE_SZ, stdin);
-
 
 			RakNet::BitStream bsOut;
 			RakNet::Time timestamp = RakNet::GetTime();
@@ -104,12 +113,13 @@ int main(int const argc, char const* const argv[])
 			if (strcmp(message, shutdown) == 0)
 			{
 				bsOut.Write((RakNet::MessageID)ID_SHUTDOWN);
-				//running = false;
 			}
+			//check if message is print connected users command
 			else if (strcmp(message, clientList) == 0)
 			{
 				bsOut.Write((RakNet::MessageID)ID_PRINT_CONNECTED_USERS);
 			}
+			//else, user is sending a normal chat message
 			else
 			{
 				bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
@@ -122,15 +132,19 @@ int main(int const argc, char const* const argv[])
 				bsOut.Write(chatMessage);
 			}
 
+			//send the packet to server
 			peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, sysAddress, false);
 		}
 
+		//for each packet received from server
 		for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
 		{
+			//set up bufPtr to help us handle packets with multiple IDs
 			unsigned int bufIndex = 0;
 			unsigned char bufPtr = packet->data[bufIndex];
 			RakNet::BitStream bsIn(packet->data, packet->length, false);
 
+			//while we are still reading the same packet
 			while (bufPtr != NULL)
 			{
 				switch (packet->data[0])
@@ -140,6 +154,7 @@ int main(int const argc, char const* const argv[])
 				{
 					printf("Our connection request has been accepted.\n");
 
+					//save server address so we can send messages to server outside this for loop
 					sysAddress = packet->systemAddress;
 
 					RakNet::BitStream bsOut;
@@ -181,6 +196,7 @@ int main(int const argc, char const* const argv[])
 					bsIn.Read(rs);
 					printf("%s\n", rs.C_String());
 
+					//advance bufPtr
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
@@ -195,6 +211,7 @@ int main(int const argc, char const* const argv[])
 
 					printf("%s ", rs.C_String());
 
+					//advance bufptr
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
@@ -207,8 +224,10 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(ts);
 
+					//special printf to handle timestamp
 					printf("\n%" PRINTF_64_BIT_MODIFIER "u ", ts);
 
+					//advance the bufptr
 					bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time)];
 					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
 				}
@@ -223,6 +242,7 @@ int main(int const argc, char const* const argv[])
 
 					printf("%s ", rs.C_String());
 
+					//advance the bufptr
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
@@ -237,17 +257,19 @@ int main(int const argc, char const* const argv[])
 
 					printf("%s ", users.C_String());
 
+					//nothing further in this packet...
 					bufPtr = NULL;
 				}
 				break;
 				default:
-					printf("Message with identifier %i has arrived.\n", packet->data[0]);
+					//printf("Message with identifier %i has arrived.\n", bufPtr);
 					break;
 				}
 			}
 		}
 	}
 
+	//shut down client
 	RakNet::RakPeerInterface::DestroyInstance(peer);
 
 	printf("\n\n");
