@@ -44,7 +44,9 @@ enum GameMessages
 {
 	ID_GAME_MESSAGE_1=ID_USER_PACKET_ENUM+1,
 	ID_CHAT_MESSAGE,
-	ID_USERNAME
+	ID_USERNAME,
+	ID_JOIN_USERNAME,
+	ID_PRINT_CONNECTED_USERS
 };
 
 int main(int const argc, char const* const argv[])
@@ -62,7 +64,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.62");
+		strcpy(str, "172.16.2.67");
 	}
 
 	printf("Enter a username. No spaces\n");
@@ -119,11 +121,13 @@ int main(int const argc, char const* const argv[])
 					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
 					bsOut.Write(timestamp);
 
-					bsOut.Write((RakNet::MessageID)ID_USERNAME);
+					bsOut.Write((RakNet::MessageID)ID_JOIN_USERNAME);
 					bsOut.Write(username);
 
 					bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
 					bsOut.Write("Hello world");
+
+					bsOut.Write((RakNet::MessageID)ID_PRINT_CONNECTED_USERS);
 
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 
@@ -191,6 +195,18 @@ int main(int const argc, char const* const argv[])
 
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
+				break;
+				case ID_PRINT_CONNECTED_USERS:
+				{
+					RakNet::RakString users;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(users);
+
+					printf("%s ", users.C_String());
+
+					bufPtr = NULL;
 				}
 				break;
 				default:

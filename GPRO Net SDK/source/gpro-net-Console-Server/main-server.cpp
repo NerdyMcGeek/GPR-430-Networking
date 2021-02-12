@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <vector>
 
 #include "RakNet/RakPeerInterface.h"
 #include "RakNet/MessageIdentifiers.h"
@@ -42,7 +42,9 @@ enum GameMessages
 {
 	ID_GAME_MESSAGE_1 = ID_USER_PACKET_ENUM + 1,
 	ID_CHAT_MESSAGE,
-	ID_USERNAME
+	ID_USERNAME,
+	ID_JOIN_USERNAME,
+	ID_PRINT_CONNECTED_USERS
 };
 
 int main(int const argc, char const* const argv[])
@@ -53,6 +55,8 @@ int main(int const argc, char const* const argv[])
 	peer->Startup(MAX_CLIENTS, &sd, 1);
 	peer->SetOccasionalPing(true);
 	RakNet::Packet* packet;
+
+	std::vector<RakNet::RakString> connectedUsers;
 
 	printf("Starting the server.\n");
 	peer->SetMaximumIncomingConnections(MAX_CLIENTS);
@@ -187,6 +191,40 @@ int main(int const argc, char const* const argv[])
 
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
+				break;
+				case ID_JOIN_USERNAME:
+				{
+					RakNet::RakString rs;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(rs);
+
+					connectedUsers.push_back(rs);
+
+					printf("%s ", rs.C_String());
+
+					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
+					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
+				}
+				break;
+				case ID_PRINT_CONNECTED_USERS:
+				{
+					RakNet::RakString users = "Users: ";
+					for (int i = 0; i < connectedUsers.size(); i++)
+					{
+						users += connectedUsers.at(i) + " ";
+						printf("%s ", users.C_String());
+					}
+
+					users += "\n";
+
+					RakNet::BitStream bsOut;
+					bsOut.Write((RakNet::MessageID)ID_PRINT_CONNECTED_USERS);
+					bsOut.Write(users);
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+
+					bufPtr = NULL;
 				}
 				break;
 				default:
