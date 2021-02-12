@@ -154,8 +154,8 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					printf("%s ", rs.C_String());
-					fprintf(logFile, "%s ", rs.C_String());
+					printf("%s", rs.C_String());
+					fprintf(logFile, "%s", rs.C_String());
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
@@ -177,11 +177,6 @@ int main(int const argc, char const* const argv[])
 					printf("%" PRINTF_64_BIT_MODIFIER "u ", ts);
 					//send timestamp to log (?)
 					fprintf(logFile, "%" PRINTF_64_BIT_MODIFIER "u ", ts);
-
-					RakNet::BitStream bsOut;
-					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
-					bsOut.Write(ts);
-					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
 
 					bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time)];
 					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
