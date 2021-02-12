@@ -161,6 +161,7 @@ int main(int const argc, char const* const argv[])
 
 					printf("%" PRINTF_64_BIT_MODIFIER "u ", ts);
 					//send timestamp to log (?)
+					fprintf(logFile, "%" PRINTF_64_BIT_MODIFIER "u ", ts);
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_TIMESTAMP);
@@ -179,6 +180,7 @@ int main(int const argc, char const* const argv[])
 					bsIn.Read(rs);
 
 					printf("%s ", rs.C_String());
+					fprintf(logFile, "%s ", rs.C_String());
 
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_USERNAME);
