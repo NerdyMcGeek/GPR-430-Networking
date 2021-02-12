@@ -22,6 +22,11 @@
 	Main source for console server application.
 */
 
+/*
+	GPRO Net Project 1
+	By Alexander Wood and Avery Follett
+*/
+
 #include "gpro-net/gpro-net.h"
 
 
@@ -67,7 +72,7 @@ int main(int const argc, char const* const argv[])
 	{
 		printf("Could not open file");
 	}
-	// ^ this saves in a weird place. users/[user]/remote/reponame/bin
+	// ^ this saves in a weird place. users/[user]/remote/[reponame]/bin
 
 	bool running = true;
 	//Always running loop to receive packets
@@ -119,6 +124,7 @@ int main(int const argc, char const* const argv[])
 					fclose(logFile);
 					bufPtr = NULL;
 					break;
+				//This handles when a client connects
 				case ID_GAME_MESSAGE_1:
 				{
 					RakNet::RakString rs;
@@ -140,6 +146,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				//This handles messages recieved from clients
 				case ID_CHAT_MESSAGE:
 				{
 					RakNet::RakString rs;
@@ -159,6 +166,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				//Handles message timestamping
 				case ID_TIMESTAMP:
 				{
 					RakNet::Time ts;
@@ -179,6 +187,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
 				}
 				break;
+				//Handles client usernames
 				case ID_USERNAME:
 				{
 					RakNet::RakString rs;
@@ -198,12 +207,14 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				//Proper shutdown procedure (called when client sends the message quitServer)
 				case ID_SHUTDOWN:
 				{
 					running = false;
 					bufPtr = NULL;
 				}
 				break;
+				//Handles usernames and adds to a vector when connected
 				case ID_JOIN_USERNAME:
 				{
 					RakNet::RakString rs;
@@ -219,6 +230,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				//Prints out a vector of connected users when requested by client (client sends message clientList)
 				case ID_PRINT_CONNECTED_USERS:
 				{
 					RakNet::RakString users = "Users: \n";

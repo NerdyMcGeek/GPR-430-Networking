@@ -22,6 +22,11 @@
 	Main source for console client application.
 */
 
+/*
+	GPRO Net Project 1
+	By Alexander Wood and Avery Follett
+*/
+
 #include "gpro-net/gpro-net.h"
 
 
@@ -70,7 +75,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.67");
+		strcpy(str, "172.16.2.186");
 	}
 
 	printf("Enter a username. No spaces\n");
@@ -130,6 +135,7 @@ int main(int const argc, char const* const argv[])
 			{
 				switch (packet->data[0])
 				{
+				// Handles initial connection to server
 				case ID_CONNECTION_REQUEST_ACCEPTED:
 				{
 					printf("Our connection request has been accepted.\n");
@@ -166,6 +172,7 @@ int main(int const argc, char const* const argv[])
 					printf("A client lost the connection.\n");
 					bufPtr = NULL;
 					break;
+				//Recieves welcome message after connecting to server
 				case ID_GAME_MESSAGE_1:
 				{
 					RakNet::RakString rs;
@@ -178,6 +185,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				// Reads messages sent from server
 				case ID_CHAT_MESSAGE:
 				{
 					RakNet::RakString rs;
@@ -191,6 +199,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				//Handles timestamps recieved from the server
 				case ID_TIMESTAMP:
 				{
 					RakNet::Time ts;
@@ -204,6 +213,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
 				}
 				break;
+				// Handles usernames recieved from the server
 				case ID_USERNAME:
 				{
 					RakNet::RakString rs;
@@ -217,6 +227,7 @@ int main(int const argc, char const* const argv[])
 					bufIndex += sizeof(RakNet::MessageID) + 2 + static_cast<int>(rs.GetLength());
 				}
 				break;
+				// Reads list of users connected to the server
 				case ID_PRINT_CONNECTED_USERS:
 				{
 					RakNet::RakString users;
