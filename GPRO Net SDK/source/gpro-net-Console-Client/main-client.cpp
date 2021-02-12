@@ -62,6 +62,8 @@ int main(int const argc, char const* const argv[])
 	char shutdown[MAX_MESSAGE_SZ] = "quitServer\n";
 	char clientList[MAX_MESSAGE_SZ] = "clientList\n";
 
+	HWND window = GetForegroundWindow();
+
 	RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
 	RakNet::Packet* packet;
 	RakNet::SystemAddress sysAddress;
@@ -86,7 +88,7 @@ int main(int const argc, char const* const argv[])
 
 	while (running)
 	{
-		if (GetKeyState(VK_SPACE) & 0x8000)
+		if ((GetKeyState(VK_SPACE) & 0x8000) && window == GetForegroundWindow())
 		{
 			printf("Enter message:\n");
 			char message[MAX_MESSAGE_SZ];
