@@ -23,7 +23,7 @@
 */
 
 /*
-	GPRO Net Project 1
+	GPRO Net Project 2
 	By Alexander Wood and Avery Follett
 */
 
@@ -31,7 +31,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <Windows.h>
 
 #include "RakNet/RakPeerInterface.h"
@@ -52,13 +52,15 @@ enum GameMessages
 	ID_USERNAME,
 	ID_JOIN_USERNAME,
 	ID_PRINT_CONNECTED_USERS,
-	ID_SHUTDOWN
+	ID_SHUTDOWN,
+	ID_LOBBY_SELECT
 };
 
 int main(int const argc, char const* const argv[])
 {
 	char str[512]; //for the server IP
 	char un[512]; //for the client's username
+	char lobbyNum[2]; //for the selected lobby number
 
 	//char arrays just used for comparison for user commands
 	char shutdown[MAX_MESSAGE_SZ] = "quitServer\n";
@@ -78,7 +80,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.64");
+		strcpy(str, "172.16.2.51");
 	}
 
 	//ask for user to enter their username
@@ -87,6 +89,10 @@ int main(int const argc, char const* const argv[])
 
 	printf("Connecting...\n");
 	peer->Connect(str, SERVER_PORT, 0, 0);
+
+	//ask for lobby #
+	printf("Enter a lobby number 1-4\n");
+	gets_s(lobbyNum);
 
 	//get a reference to THIS window
 	//thank you StackOverflow: https://stackoverflow.com/questions/18034988/checking-if-a-window-is-active
@@ -169,6 +175,9 @@ int main(int const argc, char const* const argv[])
 
 					bsOut.Write((RakNet::MessageID)ID_GAME_MESSAGE_1);
 					bsOut.Write("Hello world");
+
+					bsOut.Write((RakNet::MessageID)ID_LOBBY_SELECT);
+					bsOut.Write(lobbyNum);
 
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 

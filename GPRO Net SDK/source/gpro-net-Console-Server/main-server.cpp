@@ -23,7 +23,7 @@
 */
 
 /*
-	GPRO Net Project 1
+	GPRO Net Project 2
 	By Alexander Wood and Avery Follett
 */
 
@@ -31,7 +31,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <vector>
 
 #include "RakNet/RakPeerInterface.h"
@@ -41,6 +41,7 @@
 
 #define MAX_CLIENTS 10
 #define SERVER_PORT 60000
+#define MAX_LOBBIES 4
 
 //These are the custom IDs for different tasks that we made
 enum GameMessages
@@ -50,7 +51,8 @@ enum GameMessages
 	ID_USERNAME,
 	ID_JOIN_USERNAME,
 	ID_PRINT_CONNECTED_USERS,
-	ID_SHUTDOWN
+	ID_SHUTDOWN,
+	ID_LOBBY_SELECT
 };
 
 int main(int const argc, char const* const argv[])
@@ -68,6 +70,9 @@ int main(int const argc, char const* const argv[])
 
 	//vector of connected users
 	std::vector<RakNet::RakString> connectedUsers;
+
+	//array of lobbies
+	std::vector<RakNet::SystemAddress> lobby1, lobby2, lobby3, lobby4;
 
 	//open log file to start logging server output
 	FILE* logFile = fopen("messageLog.txt", "w");
@@ -259,6 +264,18 @@ int main(int const argc, char const* const argv[])
 					bsOut.Write((RakNet::MessageID)ID_PRINT_CONNECTED_USERS);
 					bsOut.Write(users);
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+
+					bufPtr = NULL;
+				}
+				break;
+				case ID_LOBBY_SELECT:
+				{
+					char ri[2];
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(ri);
+
+					printf("%s ", ri);
 
 					bufPtr = NULL;
 				}
