@@ -55,6 +55,27 @@ enum GameMessages
 	ID_LOBBY_SELECT
 };
 
+struct ServerUser
+{
+	int id;
+	RakNet::RakString username;
+	RakNet::SystemAddress address;
+	int lobbyNumber;
+
+	//when we construct a ServerUser, we must provide it a system address at least
+	ServerUser(RakNet::SystemAddress address) : address(address), id(-1), lobbyNumber(-1) {}
+
+	bool operator () (const ServerUser* user) const
+	{
+		return user->address == address;
+	}
+
+	bool isLobbyNum(int lobbySearchNumber)
+	{
+		return lobbySearchNumber == lobbyNumber;
+	}
+};
+
 int main(int const argc, char const* const argv[])
 {
 	//set up RakNet vars
@@ -69,10 +90,10 @@ int main(int const argc, char const* const argv[])
 	printf("Starting the server.\n");
 
 	//vector of connected users
-	std::vector<RakNet::RakString> connectedUsers;
+	std::vector<ServerUser*> users;
 
 	//array of lobbies
-	std::vector<RakNet::SystemAddress> lobby1, lobby2, lobby3, lobby4;
+	//std::vector<RakNet::SystemAddress> lobby1, lobby2, lobby3, lobby4;
 
 	//open log file to start logging server output
 	FILE* logFile = fopen("messageLog.txt", "w");
@@ -117,8 +138,13 @@ int main(int const argc, char const* const argv[])
 					bufPtr = NULL;
 					break;
 				case ID_NEW_INCOMING_CONNECTION:
+				{
 					printf("A connection is incoming.\n");
+					ServerUser* user = new ServerUser(packet->systemAddress);
+					user->id = RakNet::RakNetGUID::ToUint32(packet->guid);
+					users.push_back(user);
 					bufPtr = NULL;
+				}
 					break;
 				case ID_NO_FREE_INCOMING_CONNECTIONS:
 					printf("The server is full.\n");
@@ -173,7 +199,16 @@ int main(int const argc, char const* const argv[])
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
 					bsOut.Write(rs);
-					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+
+					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+
+					for (size_t i = 0; i < users.size(); i++)
+					{
+						if (users[i]->isLobbyNum(it[0]->lobbyNumber))
+						{
+							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
+						}
+					}
 
 					//advance the bufptr
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
@@ -214,7 +249,16 @@ int main(int const argc, char const* const argv[])
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_USERNAME);
 					bsOut.Write(rs);
-					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_RAKNET_GUID, true);
+
+					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+
+					for (size_t i = 0; i < users.size(); i++)
+					{
+						if (users[i]->isLobbyNum(it[0]->lobbyNumber))
+						{
+							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
+						}
+					}
 
 					//advance the bufptr
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
@@ -236,10 +280,11 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					//add username and IP to vector of connected users
-					connectedUsers.push_back(rs + " " + packet->systemAddress.ToString() + "\n");
+					//add username to user based on system IP address
+					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+					it[0]->username = rs;
 
-					printf("%s ", rs.C_String());
+					printf("%s ", it[0]->username.C_String());
 
 					//advance the bufptr
 					bufPtr = packet->data[bufIndex + sizeof(RakNet::MessageID) + 2 + rs.GetLength()];
@@ -250,19 +295,20 @@ int main(int const argc, char const* const argv[])
 				case ID_PRINT_CONNECTED_USERS:
 				{
 					//loop through all connected users and add them all to a string
-					RakNet::RakString users = "Users: \n";
-					for (int i = 0; i < connectedUsers.size(); i++)
+					RakNet::RakString usersString = "Users: \n";
+					for (int i = 0; i < users.size(); i++)
 					{
-						users += connectedUsers.at(i) + " ";
-						printf("%s ", users.C_String());
+						usersString += users.at(i)->username + " ";
+						printf("%s ", usersString.C_String());
 					}
 
-					users += "\n";
+					usersString += "\n";
 
 					//send the string of connected users to the client who requested
 					RakNet::BitStream bsOut;
 					bsOut.Write((RakNet::MessageID)ID_PRINT_CONNECTED_USERS);
 					bsOut.Write(users);
+
 					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
 
 					bufPtr = NULL;
@@ -279,28 +325,31 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(ri);
 
+					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+
+					//Assign a lobby number to the user
 					if (strcmp(ri, lobby1text) == 0)
 					{
-						lobby1.push_back(packet->systemAddress);
-						printf(packet->systemAddress.ToString());
+						it[0]->lobbyNumber = 1;
+						printf(it[0]->address.ToString());
 						printf(" connected to lobby 1\n");
 					}
 					else if (strcmp(ri, lobby2text) == 0)
 					{
-						lobby2.push_back(packet->systemAddress);
-						printf(packet->systemAddress.ToString());
+						it[0]->lobbyNumber = 2;
+						printf(it[0]->address.ToString());
 						printf(" connected to lobby 2\n");
 					}
 					else if (strcmp(ri, lobby3text) == 0)
 					{
-						lobby3.push_back(packet->systemAddress);
-						printf(packet->systemAddress.ToString());
+						it[0]->lobbyNumber = 3;
+						printf(it[0]->address.ToString());
 						printf(" connected to lobby 3\n");
 					}
 					else if (strcmp(ri, lobby4text) == 0)
 					{
-						lobby4.push_back(packet->systemAddress);
-						printf(packet->systemAddress.ToString());
+						it[0]->lobbyNumber = 4;
+						printf(it[0]->address.ToString());
 						printf(" connected to lobby 4\n");
 					}
 					else
