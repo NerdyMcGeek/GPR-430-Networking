@@ -271,11 +271,42 @@ int main(int const argc, char const* const argv[])
 				case ID_LOBBY_SELECT:
 				{
 					char ri[2];
+					char lobby1text[2] = "1";
+					char lobby2text[2] = "2";
+					char lobby3text[2] = "3";
+					char lobby4text[2] = "4";
 
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(ri);
 
-					printf("%s ", ri);
+					if (strcmp(ri, lobby1text) == 0)
+					{
+						lobby1.push_back(packet->systemAddress);
+						printf(packet->systemAddress.ToString());
+						printf(" connected to lobby 1\n");
+					}
+					else if (strcmp(ri, lobby2text) == 0)
+					{
+						lobby2.push_back(packet->systemAddress);
+						printf(packet->systemAddress.ToString());
+						printf(" connected to lobby 2\n");
+					}
+					else if (strcmp(ri, lobby3text) == 0)
+					{
+						lobby3.push_back(packet->systemAddress);
+						printf(packet->systemAddress.ToString());
+						printf(" connected to lobby 3\n");
+					}
+					else if (strcmp(ri, lobby4text) == 0)
+					{
+						lobby4.push_back(packet->systemAddress);
+						printf(packet->systemAddress.ToString());
+						printf(" connected to lobby 4\n");
+					}
+					else
+					{
+						printf("Invalid lobby number");
+					}
 
 					bufPtr = NULL;
 				}
