@@ -80,7 +80,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for 127.0.0.1\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.186");
+		strcpy(str, "172.16.2.51");
 	}
 
 	//ask for user to enter their username

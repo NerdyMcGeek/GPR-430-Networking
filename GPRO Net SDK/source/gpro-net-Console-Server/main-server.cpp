@@ -55,15 +55,27 @@ enum GameMessages
 	ID_LOBBY_SELECT
 };
 
+struct ServerUser;
+
+struct Lobby
+{
+	std::vector<ServerUser> users;
+	int lobbyNumber;
+
+	Lobby() : lobbyNumber(-1) {}
+	Lobby(int lobbyNumber) : lobbyNumber(lobbyNumber) {}
+};
+
 struct ServerUser
 {
 	int id;
 	RakNet::RakString username;
 	RakNet::SystemAddress address;
-	int lobbyNumber;
+	Lobby* currentLobby;
+	bool isSpectator;
 
 	//when we construct a ServerUser, we must provide it a system address at least
-	ServerUser(RakNet::SystemAddress address) : address(address), id(-1), lobbyNumber(-1) {}
+	ServerUser(RakNet::SystemAddress address) : address(address), id(-1), currentLobby(NULL), isSpectator(false) {}
 
 	bool operator () (const ServerUser* user) const
 	{
@@ -72,7 +84,7 @@ struct ServerUser
 
 	bool isLobbyNum(int lobbySearchNumber)
 	{
-		return lobbySearchNumber == lobbyNumber;
+		return lobbySearchNumber == currentLobby->lobbyNumber;
 	}
 };
 
@@ -92,8 +104,13 @@ int main(int const argc, char const* const argv[])
 	//vector of connected users
 	std::vector<ServerUser*> users;
 
-	//array of lobbies
-	//std::vector<RakNet::SystemAddress> lobby1, lobby2, lobby3, lobby4;
+	//vector of lobbies
+	std::vector<Lobby*> lobbies;
+
+	for (int i = 1; i <= MAX_LOBBIES; i++)
+	{
+		lobbies.push_back(new Lobby(i));
+	}
 
 	//open log file to start logging server output
 	FILE* logFile = fopen("messageLog.txt", "w");
@@ -204,7 +221,7 @@ int main(int const argc, char const* const argv[])
 
 					for (size_t i = 0; i < users.size(); i++)
 					{
-						if (users[i]->isLobbyNum(it[0]->lobbyNumber))
+						if (users[i]->isLobbyNum(it[0]->currentLobby->lobbyNumber))
 						{
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
 						}
@@ -254,7 +271,7 @@ int main(int const argc, char const* const argv[])
 
 					for (size_t i = 0; i < users.size(); i++)
 					{
-						if (users[i]->isLobbyNum(it[0]->lobbyNumber))
+						if (users[i]->isLobbyNum(it[0]->currentLobby->lobbyNumber))
 						{
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
 						}
@@ -330,27 +347,31 @@ int main(int const argc, char const* const argv[])
 					//Assign a lobby number to the user
 					if (strcmp(ri, lobby1text) == 0)
 					{
-						it[0]->lobbyNumber = 1;
+						it[0]->currentLobby = lobbies[0];
 						printf(it[0]->address.ToString());
-						printf(" connected to lobby 1\n");
+						printf(" connected to lobby ");
+						printf("%d\n", it[0]->currentLobby->lobbyNumber);
 					}
 					else if (strcmp(ri, lobby2text) == 0)
 					{
-						it[0]->lobbyNumber = 2;
+						it[0]->currentLobby = lobbies[1];
 						printf(it[0]->address.ToString());
-						printf(" connected to lobby 2\n");
+						printf(" connected to lobby ");
+						printf("%d\n", it[0]->currentLobby->lobbyNumber);
 					}
 					else if (strcmp(ri, lobby3text) == 0)
 					{
-						it[0]->lobbyNumber = 3;
+						it[0]->currentLobby = lobbies[2];
 						printf(it[0]->address.ToString());
-						printf(" connected to lobby 3\n");
+						printf(" connected to lobby ");
+						printf("%d\n", it[0]->currentLobby->lobbyNumber);
 					}
 					else if (strcmp(ri, lobby4text) == 0)
 					{
-						it[0]->lobbyNumber = 4;
+						it[0]->currentLobby = lobbies[3];
 						printf(it[0]->address.ToString());
-						printf(" connected to lobby 4\n");
+						printf(" connected to lobby ");
+						printf("%d\n", it[0]->currentLobby->lobbyNumber);
 					}
 					else
 					{
