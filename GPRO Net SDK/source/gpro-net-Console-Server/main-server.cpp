@@ -208,22 +208,26 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					//print chat message
-					printf("%s", rs.C_String());
-					fprintf(logFile, "%s", rs.C_String());
-
-					//distribute chat message to all clients
-					RakNet::BitStream bsOut;
-					bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
-					bsOut.Write(rs);
-
 					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
-
-					for (size_t i = 0; i < users.size(); i++)
+					if (!it[0]->isSpectator)
 					{
-						if (users[i]->isLobbyNum(it[0]->currentLobby->lobbyNumber))
+						//print chat message
+						printf("%s", rs.C_String());
+						fprintf(logFile, "%s", rs.C_String());
+
+						//distribute chat message to all clients
+						RakNet::BitStream bsOut;
+						bsOut.Write((RakNet::MessageID)ID_CHAT_MESSAGE);
+						bsOut.Write(rs);
+
+						std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+
+						for (size_t i = 0; i < users.size(); i++)
 						{
-							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
+							if (users[i]->isLobbyNum(it[0]->currentLobby->lobbyNumber))
+							{
+								peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
+							}
 						}
 					}
 
@@ -235,19 +239,23 @@ int main(int const argc, char const* const argv[])
 				//Handles message timestamping
 				case ID_TIMESTAMP:
 				{
-					RakNet::Time ts;
+					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+					if (!it[0]->isSpectator)
+					{
+						RakNet::Time ts;
 
-					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
-					bsIn.Read(ts);
+						bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+						bsIn.Read(ts);
 
-					//special printf to handle timestamp
-					printf("%" PRINTF_64_BIT_MODIFIER "u ", ts);
-					//send timestamp to log
-					fprintf(logFile, "%" PRINTF_64_BIT_MODIFIER "u ", ts);
+						//special printf to handle timestamp
+						printf("%" PRINTF_64_BIT_MODIFIER "u ", ts);
+						//send timestamp to log
+						fprintf(logFile, "%" PRINTF_64_BIT_MODIFIER "u ", ts);
+					}
 
-					//advance the bufptr
-					bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time)];
-					bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
+						//advance the bufptr
+						bufPtr = packet->data[bufIndex + sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time)];
+						bufIndex += sizeof((RakNet::MessageID)ID_TIMESTAMP) + sizeof(RakNet::Time);
 				}
 				break;
 				//Handles client usernames
@@ -258,22 +266,26 @@ int main(int const argc, char const* const argv[])
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(rs);
 
-					//print the username
-					printf("%s ", rs.C_String());
-					fprintf(logFile, "%s ", rs.C_String());
-
-					//distribute username to all clients
-					RakNet::BitStream bsOut;
-					bsOut.Write((RakNet::MessageID)ID_USERNAME);
-					bsOut.Write(rs);
-
 					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
-
-					for (size_t i = 0; i < users.size(); i++)
+					if (!it[0]->isSpectator)
 					{
-						if (users[i]->isLobbyNum(it[0]->currentLobby->lobbyNumber))
+						//print the username
+						printf("%s ", rs.C_String());
+						fprintf(logFile, "%s ", rs.C_String());
+
+						//distribute username to all clients
+						RakNet::BitStream bsOut;
+						bsOut.Write((RakNet::MessageID)ID_USERNAME);
+						bsOut.Write(rs);
+
+						std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+
+						for (size_t i = 0; i < users.size(); i++)
 						{
-							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
+							if (users[i]->isLobbyNum(it[0]->currentLobby->lobbyNumber))
+							{
+								peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, users[i]->address, false);
+							}
 						}
 					}
 
@@ -348,30 +360,70 @@ int main(int const argc, char const* const argv[])
 					if (strcmp(ri, lobby1text) == 0)
 					{
 						it[0]->currentLobby = lobbies[0];
+						it[0]->currentLobby->users.push_back(*it[0]);
 						printf(it[0]->address.ToString());
 						printf(" connected to lobby ");
-						printf("%d\n", it[0]->currentLobby->lobbyNumber);
+						printf("%d ", it[0]->currentLobby->lobbyNumber);
+						if (it[0]->currentLobby->users.size() > 2)
+						{
+							it[0]->isSpectator = true;
+							printf("as spectator\n");
+						}
+						else
+						{
+							printf("as player\n");
+						}
 					}
 					else if (strcmp(ri, lobby2text) == 0)
 					{
 						it[0]->currentLobby = lobbies[1];
+						it[0]->currentLobby->users.push_back(*it[0]);
 						printf(it[0]->address.ToString());
 						printf(" connected to lobby ");
-						printf("%d\n", it[0]->currentLobby->lobbyNumber);
+						printf("%d ", it[0]->currentLobby->lobbyNumber);
+						if (it[0]->currentLobby->users.size() > 2)
+						{
+							it[0]->isSpectator = true;
+							printf("as spectator\n");
+						}
+						else
+						{
+							printf("as player\n");
+						}
 					}
 					else if (strcmp(ri, lobby3text) == 0)
 					{
 						it[0]->currentLobby = lobbies[2];
+						it[0]->currentLobby->users.push_back(*it[0]);
 						printf(it[0]->address.ToString());
 						printf(" connected to lobby ");
-						printf("%d\n", it[0]->currentLobby->lobbyNumber);
+						printf("%d ", it[0]->currentLobby->lobbyNumber);
+						if (it[0]->currentLobby->users.size() > 2)
+						{
+							it[0]->isSpectator = true;
+							printf("as spectator\n");
+						}
+						else
+						{
+							printf("as player\n");
+						}
 					}
 					else if (strcmp(ri, lobby4text) == 0)
 					{
 						it[0]->currentLobby = lobbies[3];
+						it[0]->currentLobby->users.push_back(*it[0]);
 						printf(it[0]->address.ToString());
 						printf(" connected to lobby ");
-						printf("%d\n", it[0]->currentLobby->lobbyNumber);
+						printf("%d ", it[0]->currentLobby->lobbyNumber);
+						if (it[0]->currentLobby->users.size() > 2)
+						{
+							it[0]->isSpectator = true;
+							printf("as spectator\n");
+						}
+						else
+						{
+							printf("as player\n");
+						}
 					}
 					else
 					{
