@@ -1,2 +1,3 @@
-# animal3D-SDK-202101SP
-animal3D SDK and related course frameworks for spring 2021.
+# GPR-430-Networking
+Various networking projects for GPR-430
+Spring semester 2021
