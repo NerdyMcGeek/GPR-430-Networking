@@ -56,7 +56,8 @@ enum GameMessages
 	ID_PRINT_CONNECTED_USERS,
 	ID_SHUTDOWN,
 	ID_LOBBY_SELECT,
-	ID_START_GAME
+	ID_START_GAME,
+	ID_UPDATE_GAME
 };
 
 struct ServerUser;
@@ -85,6 +86,7 @@ struct ServerUser
 	RakNet::SystemAddress address;
 	Lobby* currentLobby;
 	bool isSpectator;
+	bool turn = false;
 
 	//when we construct a ServerUser, we must provide it a system address at least
 	ServerUser(RakNet::SystemAddress address) : address(address), id(-1), currentLobby(NULL), isSpectator(false) {}
@@ -440,17 +442,17 @@ int main(int const argc, char const* const argv[])
 						printf("Invalid lobby number");
 					}
 
-					//Starts the lobby, maybe put this in the player connect event
+					//Starts the lobby
 					if (it[0]->currentLobby->users.size() >= 2)
 					{
 						it[0]->currentLobby->started = true;
+						it[0]->turn = true;
 						printf("Game started for lobby ");
 						printf("%d\n", it[0]->currentLobby->lobbyNumber);
 						RakNet::BitStream bsOut;
-						bool started = true;
 
 						bsOut.Write((RakNet::MessageID)ID_START_GAME);
-						bsOut.Write(started);
+						bsOut.Write(it[0]->currentLobby->gameboard);
 
 						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
 						{

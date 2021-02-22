@@ -57,7 +57,8 @@ enum GameMessages
 	ID_PRINT_CONNECTED_USERS,
 	ID_SHUTDOWN,
 	ID_LOBBY_SELECT,
-	ID_START_GAME
+	ID_START_GAME,
+	ID_UPDATE_GAME
 };
 
 void printGameboard(gpro_mancala board)
@@ -105,7 +106,6 @@ int main(int const argc, char const* const argv[])
 
 	//game logic
 	bool gameStarted = false;
-	gpro_mancala gameboard;
 
 	//start the client process
 	peer->Startup(1, &sd, 1);
@@ -307,19 +307,31 @@ int main(int const argc, char const* const argv[])
 				break;
 				case ID_START_GAME:
 				{
-					bool started;
+					gpro_mancala board;
 
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
-					bsIn.Read(started);
+					bsIn.Read(board);
 
-					gameStarted = started;
+					gameStarted = true;
+					printf("Game Started\n");
 
 					gpro_consoleClear();
 
-					printf("Game Started\n");
+					printGameboard(board);
 
-					gpro_mancala_reset(gameboard);
-					printGameboard(gameboard);
+					bufPtr = NULL;
+				}
+				break;
+				case ID_UPDATE_GAME:
+				{
+					gpro_mancala board;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(board);
+
+					gpro_consoleClear();
+
+					printGameboard(board);
 
 					bufPtr = NULL;
 				}
