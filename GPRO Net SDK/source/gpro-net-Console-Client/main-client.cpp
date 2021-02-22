@@ -40,6 +40,9 @@
 #include "RakNet/RakNetTypes.h"
 #include "RakNet/GetTime.h"
 
+#include "gpro-net/gpro-net-common/gpro-net-console.h"
+#include "gpro-net/gpro-net-common/gpro-net-gamestate.h"
+
 #define SERVER_PORT 60000
 
 const int MAX_MESSAGE_SZ = 256;
@@ -282,6 +285,8 @@ int main(int const argc, char const* const argv[])
 					bsIn.Read(started);
 
 					gameStarted = started;
+
+					gpro_consoleClear();
 
 					printf("Game Started\n");
 

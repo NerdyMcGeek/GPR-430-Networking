@@ -39,6 +39,9 @@
 #include "RakNet/BitStream.h"
 #include "RakNet/RakNetTypes.h"
 
+#include "gpro-net/gpro-net-common/gpro-net-console.h"
+#include "gpro-net/gpro-net-common/gpro-net-gamestate.h"
+
 #define MAX_CLIENTS 10
 #define SERVER_PORT 60000
 #define MAX_LOBBIES 4
