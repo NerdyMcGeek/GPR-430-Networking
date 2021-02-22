@@ -60,6 +60,28 @@ enum GameMessages
 	ID_START_GAME
 };
 
+void printGameboard(gpro_mancala board)
+{
+	printf(" _______________________________________ \n");
+
+	int cols = sizeof(board[0]) / sizeof(char);
+	for (size_t i = 0; i < cols; i++)
+	{
+		printf("| ");
+		printf("%c  ", board[0][i]);
+	}
+
+	printf("\n|    |____|____|____|____|____|____|    |\n");
+
+	for (size_t i = 0; i < cols; i++)
+	{
+		printf("| ");
+		printf("%c  ", board[1][i]);
+	}
+
+	printf("\n|____|____|____|____|____|____|____|____|");
+}
+
 int main(int const argc, char const* const argv[])
 {
 	char str[512]; //for the server IP
@@ -78,13 +100,14 @@ int main(int const argc, char const* const argv[])
 
 	//game logic
 	bool gameStarted = false;
+	gpro_mancala gameboard;
 
 	//start the client process
 	peer->Startup(1, &sd, 1);
 	peer->SetOccasionalPing(true);
 
 	//ask for user to enter server IP or hit ENTER for default
-	printf("Enter server IP or hit enter for 127.0.0.1\n");
+	printf("Enter server IP or hit enter for default\n");
 	gets_s(str);
 	if (str[0] == 0) {
 		strcpy(str, "172.16.2.51");
@@ -289,6 +312,9 @@ int main(int const argc, char const* const argv[])
 					gpro_consoleClear();
 
 					printf("Game Started\n");
+
+					gpro_mancala_reset(gameboard);
+					printGameboard(gameboard);
 
 					bufPtr = NULL;
 				}

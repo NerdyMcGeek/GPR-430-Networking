@@ -66,9 +66,16 @@ struct Lobby
 	std::vector<ServerUser> users;
 	int lobbyNumber;
 	bool started;
+	gpro_mancala gameboard;
 
-	Lobby() : lobbyNumber(-1), started(false) {}
-	Lobby(int lobbyNumber) : lobbyNumber(lobbyNumber), started(false) {}
+	Lobby() : lobbyNumber(-1), started(false) 
+	{
+		gpro_mancala_reset(gameboard);
+	}
+	Lobby(int lobbyNumber) : lobbyNumber(lobbyNumber), started(false) 
+	{
+		gpro_mancala_reset(gameboard);
+	}
 };
 
 struct ServerUser
@@ -106,10 +113,8 @@ int main(int const argc, char const* const argv[])
 	peer->SetMaximumIncomingConnections(MAX_CLIENTS);
 	printf("Starting the server.\n");
 
-	//vector of connected users
+	//user/lobby management
 	std::vector<ServerUser*> users;
-
-	//vector of lobbies
 	std::vector<Lobby*> lobbies;
 
 	for (int i = 1; i <= MAX_LOBBIES; i++)
@@ -462,7 +467,6 @@ int main(int const argc, char const* const argv[])
 				}
 			}
 		}
-
 		
 		for (size_t i = 0; i < lobbies.size(); i++)
 		{
