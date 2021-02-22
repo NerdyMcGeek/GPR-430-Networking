@@ -52,7 +52,8 @@ enum GameMessages
 	ID_JOIN_USERNAME,
 	ID_PRINT_CONNECTED_USERS,
 	ID_SHUTDOWN,
-	ID_LOBBY_SELECT
+	ID_LOBBY_SELECT,
+	ID_START_GAME
 };
 
 struct ServerUser;
@@ -61,9 +62,10 @@ struct Lobby
 {
 	std::vector<ServerUser> users;
 	int lobbyNumber;
+	bool started;
 
-	Lobby() : lobbyNumber(-1) {}
-	Lobby(int lobbyNumber) : lobbyNumber(lobbyNumber) {}
+	Lobby() : lobbyNumber(-1), started(false) {}
+	Lobby(int lobbyNumber) : lobbyNumber(lobbyNumber), started(false) {}
 };
 
 struct ServerUser
@@ -430,6 +432,24 @@ int main(int const argc, char const* const argv[])
 						printf("Invalid lobby number");
 					}
 
+					//Starts the lobby, maybe put this in the player connect event
+					if (it[0]->currentLobby->users.size() >= 2)
+					{
+						it[0]->currentLobby->started = true;
+						printf("Game started for lobby ");
+						printf("%d\n", it[0]->currentLobby->lobbyNumber);
+						RakNet::BitStream bsOut;
+						bool started = true;
+
+						bsOut.Write((RakNet::MessageID)ID_START_GAME);
+						bsOut.Write(started);
+
+						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
+						{
+							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
+						}
+					}
+
 					bufPtr = NULL;
 				}
 				break;
@@ -437,6 +457,16 @@ int main(int const argc, char const* const argv[])
 					bufPtr = NULL;
 					break;
 				}
+			}
+		}
+
+		
+		for (size_t i = 0; i < lobbies.size(); i++)
+		{
+			//Game Logic
+			if (lobbies[i]->started)
+			{
+
 			}
 		}
 	}

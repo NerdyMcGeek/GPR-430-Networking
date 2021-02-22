@@ -53,7 +53,8 @@ enum GameMessages
 	ID_JOIN_USERNAME,
 	ID_PRINT_CONNECTED_USERS,
 	ID_SHUTDOWN,
-	ID_LOBBY_SELECT
+	ID_LOBBY_SELECT,
+	ID_START_GAME
 };
 
 int main(int const argc, char const* const argv[])
@@ -71,6 +72,9 @@ int main(int const argc, char const* const argv[])
 	RakNet::Packet* packet;
 	RakNet::SystemAddress sysAddress;
 	RakNet::SocketDescriptor sd;
+
+	//game logic
+	bool gameStarted = false;
 
 	//start the client process
 	peer->Startup(1, &sd, 1);
@@ -103,7 +107,7 @@ int main(int const argc, char const* const argv[])
 	while (running)
 	{
 		//if user presses space in the foreground window (doesn't activate other chat windows)
-		if ((GetKeyState(VK_SPACE) & 0x8000) && window == GetForegroundWindow())
+		if ((GetKeyState(VK_SPACE) & 0x8000) && window == GetForegroundWindow() && !gameStarted)
 		{
 			//asks for chat message
 			printf("\nEnter message:");
@@ -267,6 +271,20 @@ int main(int const argc, char const* const argv[])
 					printf("%s ", users.C_String());
 
 					//nothing further in this packet...
+					bufPtr = NULL;
+				}
+				break;
+				case ID_START_GAME:
+				{
+					bool started;
+
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(started);
+
+					gameStarted = started;
+
+					printf("Game Started\n");
+
 					bufPtr = NULL;
 				}
 				break;
