@@ -115,7 +115,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for default\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.60");
+		strcpy(str, "172.16.2.64");
 	}
 
 	//ask for user to enter their username
@@ -342,6 +342,21 @@ int main(int const argc, char const* const argv[])
 				}
 			}
 		}
+
+		//should be able to use something like this to get mouse click location
+		/*if ((GetKeyState(VK_LBUTTON) & 0x8000) && window == GetForegroundWindow() && gameStarted)
+		{
+			short* x = new short;
+			short* y = new short;
+
+			int cursorLocation = gpro_consoleGetCursor(x, y);
+
+			if (cursorLocation == 0)
+			{
+				printf("%d  ", *x);
+				printf("%d\n", *y);
+			}
+		}*/
 	}
 
 	//shut down client
