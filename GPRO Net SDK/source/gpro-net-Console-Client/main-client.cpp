@@ -108,6 +108,8 @@ int main(int const argc, char const* const argv[])
 
 	//game logic
 	bool gameStarted = false;
+	bool isTurn = false;
+	bool isSpectator = false;
 
 	//start the client process
 	peer->Startup(1, &sd, 1);
@@ -311,9 +313,16 @@ int main(int const argc, char const* const argv[])
 				case ID_START_GAME:
 				{
 					gpro_mancala board;
+					bool turn;
+					bool spectator;
 
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(board);
+					bsIn.Read(turn);
+					bsIn.Read(spectator);
+
+					isTurn = turn;
+					isSpectator = spectator;
 
 					gameStarted = true;
 					printf("Game Started\n");

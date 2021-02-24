@@ -446,16 +446,18 @@ int main(int const argc, char const* const argv[])
 					if (it[0]->currentLobby->users.size() >= 2)
 					{
 						it[0]->currentLobby->started = true;
-						it[0]->turn = true;
+						it[0]->currentLobby->users[0].turn = true;
 						printf("Game started for lobby ");
 						printf("%d\n", it[0]->currentLobby->lobbyNumber);
 						RakNet::BitStream bsOut;
 
-						bsOut.Write((RakNet::MessageID)ID_START_GAME);
-						bsOut.Write(it[0]->currentLobby->gameboard);
-
 						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
 						{
+							
+							bsOut.Write((RakNet::MessageID)ID_START_GAME);
+							bsOut.Write(it[0]->currentLobby->gameboard);
+							bsOut.Write(it[0]->currentLobby->users[j].turn);
+							bsOut.Write(it[0]->currentLobby->users[j].isSpectator);
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
 						}
 					}
