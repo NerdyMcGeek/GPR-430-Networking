@@ -107,13 +107,20 @@ typedef enum gpro_checkers_flag
 
 typedef enum gpro_mancala_index
 {
-	gpro_mancala_score,
+	gpro_mancala_score1,
+	gpro_mancala_score2,
 	gpro_mancala_cup1,
 	gpro_mancala_cup2,
 	gpro_mancala_cup3,
 	gpro_mancala_cup4,
 	gpro_mancala_cup5,
 	gpro_mancala_cup6,
+	gpro_mancala_cup7,
+	gpro_mancala_cup8,
+	gpro_mancala_cup9,
+	gpro_mancala_cup10,
+	gpro_mancala_cup11,
+	gpro_mancala_cup12,
 	gpro_mancala_onside,
 } gpro_mancala_index;
 
