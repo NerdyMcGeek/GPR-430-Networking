@@ -104,6 +104,8 @@ int main(int const argc, char const* const argv[])
 	RakNet::SystemAddress sysAddress;
 	RakNet::SocketDescriptor sd;
 
+	CONSOLE_SELECTION_INFO selectionInfo;
+
 	//game logic
 	bool gameStarted = false;
 
@@ -115,7 +117,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for default\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.64");
+		strcpy(str, "172.16.2.59");
 	}
 
 	//ask for user to enter their username
@@ -137,6 +139,7 @@ int main(int const argc, char const* const argv[])
 
 	while (running)
 	{
+		GetConsoleSelectionInfo(&selectionInfo);
 		//if user presses space in the foreground window (doesn't activate other chat windows)
 		if ((GetKeyState(VK_SPACE) & 0x8000) && window == GetForegroundWindow() && !gameStarted)
 		{
@@ -344,19 +347,23 @@ int main(int const argc, char const* const argv[])
 		}
 
 		//should be able to use something like this to get mouse click location
-		/*if ((GetKeyState(VK_LBUTTON) & 0x8000) && window == GetForegroundWindow() && gameStarted)
+		if (window == GetForegroundWindow() && gameStarted)
 		{
-			short* x = new short;
-			short* y = new short;
 
-			int cursorLocation = gpro_consoleGetCursor(x, y);
+			short cursorX = selectionInfo.dwSelectionAnchor.X;
+			short cursorY = selectionInfo.dwSelectionAnchor.Y;
 
-			if (cursorLocation == 0)
+			if (cursorX != 0 || cursorY != 0)
+			{
+
+			}
+
+			/*if (cursorLocation == 0)
 			{
 				printf("%d  ", *x);
 				printf("%d\n", *y);
-			}
-		}*/
+			}*/
+		}
 	}
 
 	//shut down client
