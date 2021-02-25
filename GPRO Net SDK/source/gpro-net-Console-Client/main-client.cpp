@@ -387,66 +387,68 @@ gpro_mancala_index checkMancalaClickPosition(short xClick, short yClick)
 {
 	if (xClick >= 1 && xClick <= 4 && yClick >= 1 && yClick <= 4)
 	{
-		return gpro_mancala_score1;
+		return gpro_mancala_index::gpro_mancala_score1;
 	}
 	else if (xClick >= 6 && xClick <= 9 && yClick >= 1 && yClick <= 2)
 	{
-		return gpro_mancala_cup1;
+		return gpro_mancala_index::gpro_mancala_cup1;
 	}
 	else if (xClick >= 11 && xClick <= 14 && yClick >= 1 && yClick <= 2)
 	{
-		return gpro_mancala_cup2;
+		return gpro_mancala_index::gpro_mancala_cup2;
 	}
 	else if (xClick >= 16 && xClick <= 19 && yClick >= 1 && yClick <= 2)
 	{
-		return gpro_mancala_cup3;
+		return gpro_mancala_index::gpro_mancala_cup3;
 	}
 	else if (xClick >= 21 && xClick <= 24 && yClick >= 1 && yClick <= 2)
 	{
-		return gpro_mancala_cup4;
+		return gpro_mancala_index::gpro_mancala_cup4;
 	}
 	else if (xClick >= 26 && xClick <= 29 && yClick >= 1 && yClick <= 2)
 	{
-		return gpro_mancala_cup5;
+		return gpro_mancala_index::gpro_mancala_cup5;
 	}
 	else if (xClick >= 31 && xClick <= 34 && yClick >= 1 && yClick <= 2)
 	{
-		return gpro_mancala_cup6;
+		return gpro_mancala_index::gpro_mancala_cup6;
 	}
 	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup7;
+		return gpro_mancala_index::gpro_mancala_cup7;
 	}
 	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup8;
+		return gpro_mancala_index::gpro_mancala_cup8;
 	}
 	else if (xClick >= 31 && xClick <= 34 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup9;
+		return gpro_mancala_index::gpro_mancala_cup9;
 	}
 	else if (xClick >= 26 && xClick <= 29 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup8;
+		return gpro_mancala_index::gpro_mancala_cup8;
 	}
 	else if (xClick >= 21 && xClick <= 24 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup9;
+		return gpro_mancala_index::gpro_mancala_cup9;
 	}
 	else if (xClick >= 16 && xClick <= 19 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup10;
+		return gpro_mancala_index::gpro_mancala_cup10;
 	}
 	else if (xClick >= 11 && xClick <= 14 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup11;
+		return gpro_mancala_index::gpro_mancala_cup11;
 	}
 	else if (xClick >= 6 && xClick <= 9 && yClick >= 3 && yClick <= 4)
 	{
-		return gpro_mancala_cup12;
+		return gpro_mancala_index::gpro_mancala_cup12;
 	}
 	else if (xClick >= 41 && xClick <= 44 && yClick >= 1 && yClick <= 4)
 	{
-		return gpro_mancala_score2;
+		return gpro_mancala_index::gpro_mancala_score2;
 	}
+	else
+		return gpro_mancala_index::gpro_mancala_default;
 }
