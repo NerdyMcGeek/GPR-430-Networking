@@ -356,7 +356,7 @@ int main(int const argc, char const* const argv[])
 		}
 
 		//should be able to use something like this to get mouse click location
-		if (window == GetForegroundWindow() && gameStarted)
+		if (window == GetForegroundWindow() && gameStarted && !isSpectator)
 		{
 
 			short cursorX = selectionInfo.dwSelectionAnchor.X;
