@@ -88,6 +88,77 @@ void printGameboard(gpro_mancala board)
 	printf("|____|____|____|____|____|____|____|____|");
 }
 
+//this is going to compare the x and y location of a mouse click to the mancala game board and return the enum of which position they clicked
+gpro_mancala_index checkMancalaClickPosition(short xClick, short yClick)
+{
+	if (xClick >= 1 && xClick <= 4 && yClick >= 1 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_score1;
+	}
+	else if (xClick >= 6 && xClick <= 9 && yClick >= 1 && yClick <= 2)
+	{
+		return gpro_mancala_index::gpro_mancala_cup1;
+	}
+	else if (xClick >= 11 && xClick <= 14 && yClick >= 1 && yClick <= 2)
+	{
+		return gpro_mancala_index::gpro_mancala_cup2;
+	}
+	else if (xClick >= 16 && xClick <= 19 && yClick >= 1 && yClick <= 2)
+	{
+		return gpro_mancala_index::gpro_mancala_cup3;
+	}
+	else if (xClick >= 21 && xClick <= 24 && yClick >= 1 && yClick <= 2)
+	{
+		return gpro_mancala_index::gpro_mancala_cup4;
+	}
+	else if (xClick >= 26 && xClick <= 29 && yClick >= 1 && yClick <= 2)
+	{
+		return gpro_mancala_index::gpro_mancala_cup5;
+	}
+	else if (xClick >= 31 && xClick <= 34 && yClick >= 1 && yClick <= 2)
+	{
+		return gpro_mancala_index::gpro_mancala_cup6;
+	}
+	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup7;
+	}
+	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup8;
+	}
+	else if (xClick >= 31 && xClick <= 34 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup9;
+	}
+	else if (xClick >= 26 && xClick <= 29 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup8;
+	}
+	else if (xClick >= 21 && xClick <= 24 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup9;
+	}
+	else if (xClick >= 16 && xClick <= 19 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup10;
+	}
+	else if (xClick >= 11 && xClick <= 14 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup11;
+	}
+	else if (xClick >= 6 && xClick <= 9 && yClick >= 3 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_cup12;
+	}
+	else if (xClick >= 41 && xClick <= 44 && yClick >= 1 && yClick <= 4)
+	{
+		return gpro_mancala_index::gpro_mancala_score2;
+	}
+	else
+		return gpro_mancala_index::gpro_mancala_default;
+}
+
 int main(int const argc, char const* const argv[])
 {
 	char str[512]; //for the server IP
@@ -119,7 +190,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for default\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.63");
+		strcpy(str, "172.16.2.51");
 	}
 
 	//ask for user to enter their username
@@ -358,13 +429,15 @@ int main(int const argc, char const* const argv[])
 		//should be able to use something like this to get mouse click location
 		if (window == GetForegroundWindow() && gameStarted && !isSpectator)
 		{
-
+			//get coordinate of current selection
 			short cursorX = selectionInfo.dwSelectionAnchor.X;
 			short cursorY = selectionInfo.dwSelectionAnchor.Y;
 
+			//if it's a valid selection
 			if (cursorX != 0 || cursorY != 0)
 			{
-
+				gpro_mancala_index index = checkMancalaClickPosition(cursorX, cursorY);
+				continue;
 			}
 
 			/*if (cursorLocation == 0)
@@ -382,73 +455,3 @@ int main(int const argc, char const* const argv[])
 	system("pause");
 }
 
-//this is going to compare the x and y location of a mouse click to the mancala game board and return the enum of which position they clicked
-gpro_mancala_index checkMancalaClickPosition(short xClick, short yClick)
-{
-	if (xClick >= 1 && xClick <= 4 && yClick >= 1 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_score1;
-	}
-	else if (xClick >= 6 && xClick <= 9 && yClick >= 1 && yClick <= 2)
-	{
-		return gpro_mancala_index::gpro_mancala_cup1;
-	}
-	else if (xClick >= 11 && xClick <= 14 && yClick >= 1 && yClick <= 2)
-	{
-		return gpro_mancala_index::gpro_mancala_cup2;
-	}
-	else if (xClick >= 16 && xClick <= 19 && yClick >= 1 && yClick <= 2)
-	{
-		return gpro_mancala_index::gpro_mancala_cup3;
-	}
-	else if (xClick >= 21 && xClick <= 24 && yClick >= 1 && yClick <= 2)
-	{
-		return gpro_mancala_index::gpro_mancala_cup4;
-	}
-	else if (xClick >= 26 && xClick <= 29 && yClick >= 1 && yClick <= 2)
-	{
-		return gpro_mancala_index::gpro_mancala_cup5;
-	}
-	else if (xClick >= 31 && xClick <= 34 && yClick >= 1 && yClick <= 2)
-	{
-		return gpro_mancala_index::gpro_mancala_cup6;
-	}
-	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup7;
-	}
-	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup8;
-	}
-	else if (xClick >= 31 && xClick <= 34 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup9;
-	}
-	else if (xClick >= 26 && xClick <= 29 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup8;
-	}
-	else if (xClick >= 21 && xClick <= 24 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup9;
-	}
-	else if (xClick >= 16 && xClick <= 19 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup10;
-	}
-	else if (xClick >= 11 && xClick <= 14 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup11;
-	}
-	else if (xClick >= 6 && xClick <= 9 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup12;
-	}
-	else if (xClick >= 41 && xClick <= 44 && yClick >= 1 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_score2;
-	}
-	else
-		return gpro_mancala_index::gpro_mancala_default;
-}
