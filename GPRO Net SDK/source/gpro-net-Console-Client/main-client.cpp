@@ -88,72 +88,39 @@ void printGameboard(gpro_mancala board)
 	printf("|____|____|____|____|____|____|____|____|");
 }
 
-//this is going to compare the x and y location of a mouse click to the mancala game board and return the enum of which position they clicked
+//	this is going to compare the x and y location of a mouse click to the mancala game 
+//	board and return the enum of which position they clicked
+//
+//	this should only return cups on the player's side of the board,
 gpro_mancala_index checkMancalaClickPosition(short xClick, short yClick)
 {
-	if (xClick >= 1 && xClick <= 4 && yClick >= 1 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_score1;
-	}
-	else if (xClick >= 6 && xClick <= 9 && yClick >= 1 && yClick <= 2)
+	if (xClick >= 32 && xClick <= 35 && yClick >= 3 && yClick <= 4)
 	{
 		return gpro_mancala_index::gpro_mancala_cup1;
 	}
-	else if (xClick >= 11 && xClick <= 14 && yClick >= 1 && yClick <= 2)
+	else if (xClick >= 27 && xClick <= 30 && yClick >= 3 && yClick <= 4)
 	{
 		return gpro_mancala_index::gpro_mancala_cup2;
 	}
-	else if (xClick >= 16 && xClick <= 19 && yClick >= 1 && yClick <= 2)
+	else if (xClick >= 22 && xClick <= 25 && yClick >= 3 && yClick <= 4)
 	{
 		return gpro_mancala_index::gpro_mancala_cup3;
 	}
-	else if (xClick >= 21 && xClick <= 24 && yClick >= 1 && yClick <= 2)
+	else if (xClick >= 17 && xClick <= 20 && yClick >= 3 && yClick <= 4)
 	{
 		return gpro_mancala_index::gpro_mancala_cup4;
 	}
-	else if (xClick >= 26 && xClick <= 29 && yClick >= 1 && yClick <= 2)
+	else if (xClick >= 12 && xClick <= 15 && yClick >= 3 && yClick <= 4)
 	{
 		return gpro_mancala_index::gpro_mancala_cup5;
 	}
-	else if (xClick >= 31 && xClick <= 34 && yClick >= 1 && yClick <= 2)
+	else if (xClick >= 7 && xClick <= 10 && yClick >= 3 && yClick <= 4)
 	{
 		return gpro_mancala_index::gpro_mancala_cup6;
 	}
-	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
+	else if (xClick >= 37 && xClick <= 40 && yClick >= 1 && yClick <= 4)
 	{
-		return gpro_mancala_index::gpro_mancala_cup7;
-	}
-	else if (xClick >= 36 && xClick <= 39 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup8;
-	}
-	else if (xClick >= 31 && xClick <= 34 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup9;
-	}
-	else if (xClick >= 26 && xClick <= 29 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup8;
-	}
-	else if (xClick >= 21 && xClick <= 24 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup9;
-	}
-	else if (xClick >= 16 && xClick <= 19 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup10;
-	}
-	else if (xClick >= 11 && xClick <= 14 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup11;
-	}
-	else if (xClick >= 6 && xClick <= 9 && yClick >= 3 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_cup12;
-	}
-	else if (xClick >= 41 && xClick <= 44 && yClick >= 1 && yClick <= 4)
-	{
-		return gpro_mancala_index::gpro_mancala_score2;
+		return gpro_mancala_index::gpro_mancala_score;
 	}
 	else
 		return gpro_mancala_index::gpro_mancala_default;
@@ -427,7 +394,7 @@ int main(int const argc, char const* const argv[])
 		}
 
 		//should be able to use something like this to get mouse click location
-		if (window == GetForegroundWindow() && gameStarted && !isSpectator)
+		if (window == GetForegroundWindow() && gameStarted && !isSpectator && isTurn)
 		{
 			//get coordinate of current selection
 			short cursorX = selectionInfo.dwSelectionAnchor.X;
@@ -436,8 +403,17 @@ int main(int const argc, char const* const argv[])
 			//if it's a valid selection
 			if (cursorX != 0 || cursorY != 0)
 			{
-				gpro_mancala_index index = checkMancalaClickPosition(cursorX, cursorY);
-				continue;
+				//if the index is one of the 6 cups the player can choose from
+				gpro_mancala_index clickedMancalaIndex = checkMancalaClickPosition(cursorX, cursorY);
+				if (clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup1 ||
+					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup2 ||
+					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup3 ||
+					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup4 ||
+					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup5 ||
+					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup6)
+				{
+					printf("Clicked on slot");
+				}
 			}
 
 			/*if (cursorLocation == 0)
