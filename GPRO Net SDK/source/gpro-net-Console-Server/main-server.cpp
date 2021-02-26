@@ -57,7 +57,8 @@ enum GameMessages
 	ID_SHUTDOWN,
 	ID_LOBBY_SELECT,
 	ID_START_GAME,
-	ID_UPDATE_GAME
+	ID_UPDATE_GAME,
+	ID_MOVE
 };
 
 struct ServerUser;
@@ -449,20 +450,33 @@ int main(int const argc, char const* const argv[])
 						it[0]->currentLobby->users[0].turn = true;
 						printf("Game started for lobby ");
 						printf("%d\n", it[0]->currentLobby->lobbyNumber);
+
 						RakNet::BitStream bsOut;
 
 						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
 						{
-							
 							bsOut.Write((RakNet::MessageID)ID_START_GAME);
 							bsOut.Write(it[0]->currentLobby->gameboard);
 							bsOut.Write(it[0]->currentLobby->users[j].turn);
 							bsOut.Write(it[0]->currentLobby->users[j].isSpectator);
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
+							bsOut.Reset();
 						}
 					}
 
 					bufPtr = NULL;
+				}
+				break;
+				case ID_MOVE:
+				{
+					gpro_mancala_index index;
+
+					//read in move from client
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(index);
+
+					//run game logic to handle move
+
 				}
 				break;
 				default:

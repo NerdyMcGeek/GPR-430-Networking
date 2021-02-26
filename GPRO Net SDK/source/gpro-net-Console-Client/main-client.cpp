@@ -58,7 +58,8 @@ enum GameMessages
 	ID_SHUTDOWN,
 	ID_LOBBY_SELECT,
 	ID_START_GAME,
-	ID_UPDATE_GAME
+	ID_UPDATE_GAME,
+	ID_MOVE
 };
 
 void printGameboard(gpro_mancala board)
@@ -85,7 +86,7 @@ void printGameboard(gpro_mancala board)
 	printf("| %u  ", board[1][6]);
 	printf("| %u  |\n", board[1][0]);
 
-	printf("|____|____|____|____|____|____|____|____|");
+	printf("|____|____|____|____|____|____|____|____|\n\n");
 }
 
 //	this is going to compare the x and y location of a mouse click to the mancala game 
@@ -369,6 +370,11 @@ int main(int const argc, char const* const argv[])
 
 					printGameboard(board);
 
+					if (isTurn)
+					{
+						printf("It's your turn!\n");
+					}
+
 					bufPtr = NULL;
 				}
 				break;
@@ -382,6 +388,11 @@ int main(int const argc, char const* const argv[])
 					gpro_consoleClear();
 
 					printGameboard(board);
+
+					if (isTurn)
+					{
+						printf("It's your turn!\n");
+					}
 
 					bufPtr = NULL;
 				}
@@ -405,6 +416,7 @@ int main(int const argc, char const* const argv[])
 			{
 				//if the index is one of the 6 cups the player can choose from
 				gpro_mancala_index clickedMancalaIndex = checkMancalaClickPosition(cursorX, cursorY);
+
 				if (clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup1 ||
 					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup2 ||
 					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup3 ||
@@ -412,15 +424,21 @@ int main(int const argc, char const* const argv[])
 					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup5 ||
 					clickedMancalaIndex == gpro_mancala_index::gpro_mancala_cup6)
 				{
-					printf("Clicked on slot");
+					printf("Clicked on slot\n");
+
+					RakNet::BitStream bsOut;
+
+					//write the cup index that the player chose
+					bsOut.Write((RakNet::MessageID)ID_MOVE);
+					bsOut.Write(clickedMancalaIndex);
+
+					//send the packet to server
+					peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, sysAddress, false);
+
+					//it's no longer this client's turn
+					isTurn = false;
 				}
 			}
-
-			/*if (cursorLocation == 0)
-			{
-				printf("%d  ", *x);
-				printf("%d\n", *y);
-			}*/
 		}
 	}
 
@@ -430,4 +448,3 @@ int main(int const argc, char const* const argv[])
 	printf("\n\n");
 	system("pause");
 }
-
