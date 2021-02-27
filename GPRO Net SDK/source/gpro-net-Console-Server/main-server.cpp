@@ -480,7 +480,6 @@ int main(int const argc, char const* const argv[])
 					//run game logic to handle move
 					
 					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
-					//it[0]->currentLobby->gameboard;
 
 					bool playerTurn;	//this might be fucky depending on which player
 					if (it[0]->currentLobby->users[0].turn)
@@ -491,33 +490,38 @@ int main(int const argc, char const* const argv[])
 					int currentIndex = numIndex;
 					bool currentSide = playerTurn;
 
+					bool playAgain = false;
+
 					int currentStones = it[0]->currentLobby->gameboard[playerTurn][numIndex];	//"pick up" stones
 					it[0]->currentLobby->gameboard[playerTurn][numIndex] = 0;	//set to zero bc all stones at this location are picked up
 					//loop through putting the stones you "picked up" into the next pockets
 					for (currentStones; currentStones > 0; currentStones--)
 					{
-						if (currentIndex < 0)
+						if (currentIndex <= 0)
 						{
 							currentIndex = 6;
 							currentSide = !currentSide;
 						}
 						if (currentIndex <= 6)
 						{
-							it[0]->currentLobby->gameboard[currentSide][currentIndex] += 1;
 							currentIndex -= 1;
+							it[0]->currentLobby->gameboard[currentSide][currentIndex] += 1;
 						}
 					}
 					//check if last stone went in score pocket
 					if (currentSide == playerTurn && currentIndex <= 0)
 					{
-						//player can go again
+						playAgain = true;
 					}
 
 					//change turn
-					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
 					Lobby * currentLobby = it[0]->currentLobby;
-					currentLobby->users[0].turn = !currentLobby->users[0].turn;
-					currentLobby->users[1].turn = !currentLobby->users[1].turn;
+
+					if (!playAgain)
+					{
+						currentLobby->users[0].turn = !currentLobby->users[0].turn;
+						currentLobby->users[1].turn = !currentLobby->users[1].turn;
+					}
 
 					for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
 					{
@@ -538,14 +542,14 @@ int main(int const argc, char const* const argv[])
 			}
 		}
 		
-		for (size_t i = 0; i < lobbies.size(); i++)
-		{
-			//Game Logic
-			if (lobbies[i]->started)
-			{
+		//for (size_t i = 0; i < lobbies.size(); i++)
+		//{
+		//	//Game Logic
+		//	if (lobbies[i]->started)
+		//	{
 
-			}
-		}
+		//	}
+		//}
 	}
 
 	//shut down server
