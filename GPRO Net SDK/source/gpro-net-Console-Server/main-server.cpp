@@ -477,6 +477,22 @@ int main(int const argc, char const* const argv[])
 
 					//run game logic to handle move
 
+					//change turn
+					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
+					Lobby * currentLobby = it[0]->currentLobby;
+					currentLobby->users[0].turn = !currentLobby->users[0].turn;
+					currentLobby->users[1].turn = !currentLobby->users[1].turn;
+
+					for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
+					{
+						RakNet::BitStream bsOut;
+						bsOut.Write((RakNet::MessageID)ID_UPDATE_GAME);
+						bsOut.Write(it[0]->currentLobby->gameboard);
+						bsOut.Write(it[0]->currentLobby->users[j].turn);
+						peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
+					}
+
+					bufPtr = NULL;
 				}
 				break;
 				default:

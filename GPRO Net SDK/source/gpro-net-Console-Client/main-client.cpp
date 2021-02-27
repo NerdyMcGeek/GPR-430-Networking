@@ -381,9 +381,13 @@ int main(int const argc, char const* const argv[])
 				case ID_UPDATE_GAME:
 				{
 					gpro_mancala board;
+					bool turn;
 
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(board);
+					bsIn.Read(turn);
+
+					isTurn = turn;
 
 					gpro_consoleClear();
 
