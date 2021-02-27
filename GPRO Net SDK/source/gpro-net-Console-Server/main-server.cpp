@@ -480,20 +480,20 @@ int main(int const argc, char const* const argv[])
 					//run game logic to handle move
 					
 					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
-					it[0]->currentLobby->gameboard;
+					//it[0]->currentLobby->gameboard;
 
-					bool playerTurn;
+					bool playerTurn;	//this might be fucky depending on which player
 					if (it[0]->currentLobby->users[0].turn)
 						playerTurn = 0;
 					else if (it[0]->currentLobby->users[1].turn)
 						playerTurn = 1;
 				    
-					int currentStones = it[0]->currentLobby->gameboard[playerTurn][numIndex];	//"pick up" stones
-					it[0]->currentLobby->gameboard[playerTurn][numIndex] = 0;	//set to zero bc all stones at this location are picked up
-
-					//loop through putting the stones you "picked up" into the next pockets
 					int currentIndex = numIndex;
 					bool currentSide = playerTurn;
+
+					int currentStones = it[0]->currentLobby->gameboard[playerTurn][numIndex];	//"pick up" stones
+					it[0]->currentLobby->gameboard[playerTurn][numIndex] = 0;	//set to zero bc all stones at this location are picked up
+					//loop through putting the stones you "picked up" into the next pockets
 					for (currentStones; currentStones > 0; currentStones--)
 					{
 						if (currentIndex < 0)
@@ -501,7 +501,7 @@ int main(int const argc, char const* const argv[])
 							currentIndex = 6;
 							currentSide = !currentSide;
 						}
-						if (currentIndex < 6)
+						if (currentIndex <= 6)
 						{
 							it[0]->currentLobby->gameboard[currentSide][currentIndex] += 1;
 							currentIndex -= 1;
