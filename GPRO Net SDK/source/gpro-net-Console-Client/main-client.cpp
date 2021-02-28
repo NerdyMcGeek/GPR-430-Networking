@@ -62,11 +62,12 @@ enum GameMessages
 	ID_MOVE
 };
 
-void printGameboard(gpro_mancala board, int playerIndex)
+void printGameboard(gpro_mancala board, int playerIndex, std::string player0Name, std::string player1Name)
 {
-	//, std::string playerName, std::string opponentName
 	if (playerIndex == 0)
 	{
+		printf("Opponent: ");
+		printf("%s\n", player1Name.c_str());
 		printf(" _______________________________________ \n");
 
 		printf("| %u  ", board[1][0]);
@@ -89,10 +90,14 @@ void printGameboard(gpro_mancala board, int playerIndex)
 		printf("| %u  ", board[0][1]);
 		printf("| %u  |\n", board[0][0]);
 
-		printf("|____|____|____|____|____|____|____|____|\n\n");
+		printf("|____|____|____|____|____|____|____|____|\n");
+		printf("You: ");
+		printf("%s\n\n", player0Name.c_str());
 	}
 	else if (playerIndex == 1)
 	{
+		printf("Opponent: ");
+		printf("%s\n", player0Name.c_str());
 		printf(" _______________________________________ \n");
 
 		printf("| %u  ", board[0][0]);
@@ -115,7 +120,9 @@ void printGameboard(gpro_mancala board, int playerIndex)
 		printf("| %u  ", board[1][6]);
 		printf("| %u  |\n", board[1][0]);
 
-		printf("|____|____|____|____|____|____|____|____|\n\n");
+		printf("|____|____|____|____|____|____|____|____|\n");
+		printf("You: ");
+		printf("%s\n\n", player1Name.c_str());
 	}
 	else
 	{
@@ -129,31 +136,31 @@ void printGameboard(gpro_mancala board, int playerIndex)
 //	this should only return cups on the player's side of the board,
 gpro_mancala_index checkMancalaClickPosition(short xClick, short yClick)
 {
-	if (xClick >= 32 && xClick <= 35 && yClick >= 3 && yClick <= 4)
+	if (xClick >= 32 && xClick <= 35 && yClick >= 4 && yClick <= 5)
 	{
 		return gpro_mancala_index::gpro_mancala_cup1;
 	}
-	else if (xClick >= 27 && xClick <= 30 && yClick >= 3 && yClick <= 4)
+	else if (xClick >= 27 && xClick <= 30 && yClick >= 4 && yClick <= 5)
 	{
 		return gpro_mancala_index::gpro_mancala_cup2;
 	}
-	else if (xClick >= 22 && xClick <= 25 && yClick >= 3 && yClick <= 4)
+	else if (xClick >= 22 && xClick <= 25 && yClick >= 4 && yClick <= 5)
 	{
 		return gpro_mancala_index::gpro_mancala_cup3;
 	}
-	else if (xClick >= 17 && xClick <= 20 && yClick >= 3 && yClick <= 4)
+	else if (xClick >= 17 && xClick <= 20 && yClick >= 4 && yClick <= 5)
 	{
 		return gpro_mancala_index::gpro_mancala_cup4;
 	}
-	else if (xClick >= 12 && xClick <= 15 && yClick >= 3 && yClick <= 4)
+	else if (xClick >= 12 && xClick <= 15 && yClick >= 4 && yClick <= 5)
 	{
 		return gpro_mancala_index::gpro_mancala_cup5;
 	}
-	else if (xClick >= 7 && xClick <= 10 && yClick >= 3 && yClick <= 4)
+	else if (xClick >= 7 && xClick <= 10 && yClick >= 4 && yClick <= 5)
 	{
 		return gpro_mancala_index::gpro_mancala_cup6;
 	}
-	else if (xClick >= 37 && xClick <= 40 && yClick >= 1 && yClick <= 4)
+	else if (xClick >= 37 && xClick <= 40 && yClick >= 2 && yClick <= 5)
 	{
 		return gpro_mancala_index::gpro_mancala_score;
 	}
@@ -184,6 +191,8 @@ int main(int const argc, char const* const argv[])
 	bool isTurn = false;
 	bool isSpectator = false;
 	int playerIndex = -1;
+	std::string player0Username;
+	std::string player1Username;
 
 	//start the client process
 	peer->Startup(1, &sd, 1);
@@ -390,23 +399,29 @@ int main(int const argc, char const* const argv[])
 					bool turn;
 					bool spectator;
 					int index;
+					RakNet::RakString p0;
+					RakNet::RakString p1;
 
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(board);
 					bsIn.Read(turn);
 					bsIn.Read(spectator);
 					bsIn.Read(index);
+					bsIn.Read(p0);
+					bsIn.Read(p1);
 
 					isTurn = turn;
 					isSpectator = spectator;
 					playerIndex = index;
+					player0Username = p0.C_String();
+					player1Username = p1.C_String();
 
 					gameStarted = true;
 					printf("Game Started\n");
 
 					gpro_consoleClear();
 
-					printGameboard(board, playerIndex);
+					printGameboard(board, playerIndex, player0Username, player1Username);
 
 					if (isTurn)
 					{
@@ -429,7 +444,7 @@ int main(int const argc, char const* const argv[])
 
 					gpro_consoleClear();
 
-					printGameboard(board, playerIndex);
+					printGameboard(board, playerIndex, player0Username, player1Username);
 
 					if (isTurn)
 					{

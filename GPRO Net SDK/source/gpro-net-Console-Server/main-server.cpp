@@ -463,6 +463,8 @@ int main(int const argc, char const* const argv[])
 								bsOut.Write(1);
 							else
 								bsOut.Write(0);
+							bsOut.Write(it[0]->currentLobby->users[0].username);
+							bsOut.Write(it[0]->currentLobby->users[1].username);
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
 							bsOut.Reset();
 						}
