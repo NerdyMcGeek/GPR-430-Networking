@@ -62,31 +62,65 @@ enum GameMessages
 	ID_MOVE
 };
 
-void printGameboard(gpro_mancala board)
+void printGameboard(gpro_mancala board, int playerIndex)
 {
-	printf(" _______________________________________ \n");
+	//, std::string playerName, std::string opponentName
+	if (playerIndex == 0)
+	{
+		printf(" _______________________________________ \n");
 
-	printf("| %u  ", board[0][0]);
-	printf("| %u  ", board[0][1]);
-	printf("| %u  ", board[0][2]);
-	printf("| %u  ", board[0][3]);
-	printf("| %u  ", board[0][4]);
-	printf("| %u  ", board[0][5]);
-	printf("| %u  |", board[0][6]);
-	printf("    |\n");
+		printf("| %u  ", board[1][0]);
+		printf("| %u  ", board[1][6]);
+		printf("| %u  ", board[1][5]);
+		printf("| %u  ", board[1][4]);
+		printf("| %u  ", board[1][3]);
+		printf("| %u  ", board[1][2]);
+		printf("| %u  |", board[1][1]);
+		printf("    |\n");
 
-	printf("|    |____|____|____|____|____|____|    |\n");
+		printf("|    |____|____|____|____|____|____|    |\n");
 
-	printf("|    ");
-	printf("| %u  ", board[1][1]);
-	printf("| %u  ", board[1][2]);
-	printf("| %u  ", board[1][3]);
-	printf("| %u  ", board[1][4]);
-	printf("| %u  ", board[1][5]);
-	printf("| %u  ", board[1][6]);
-	printf("| %u  |\n", board[1][0]);
+		printf("|    ");
+		printf("| %u  ", board[0][6]);
+		printf("| %u  ", board[0][5]);
+		printf("| %u  ", board[0][4]);
+		printf("| %u  ", board[0][3]);
+		printf("| %u  ", board[0][2]);
+		printf("| %u  ", board[0][1]);
+		printf("| %u  |\n", board[0][0]);
 
-	printf("|____|____|____|____|____|____|____|____|\n\n");
+		printf("|____|____|____|____|____|____|____|____|\n\n");
+	}
+	else if (playerIndex == 1)
+	{
+		printf(" _______________________________________ \n");
+
+		printf("| %u  ", board[0][0]);
+		printf("| %u  ", board[0][1]);
+		printf("| %u  ", board[0][2]);
+		printf("| %u  ", board[0][3]);
+		printf("| %u  ", board[0][4]);
+		printf("| %u  ", board[0][5]);
+		printf("| %u  |", board[0][6]);
+		printf("    |\n");
+
+		printf("|    |____|____|____|____|____|____|    |\n");
+
+		printf("|    ");
+		printf("| %u  ", board[1][1]);
+		printf("| %u  ", board[1][2]);
+		printf("| %u  ", board[1][3]);
+		printf("| %u  ", board[1][4]);
+		printf("| %u  ", board[1][5]);
+		printf("| %u  ", board[1][6]);
+		printf("| %u  |\n", board[1][0]);
+
+		printf("|____|____|____|____|____|____|____|____|\n\n");
+	}
+	else
+	{
+		printf("Invalid playerIndex\n");
+	}
 }
 
 //	this is going to compare the x and y location of a mouse click to the mancala game 
@@ -149,6 +183,7 @@ int main(int const argc, char const* const argv[])
 	bool gameStarted = false;
 	bool isTurn = false;
 	bool isSpectator = false;
+	int playerIndex = -1;
 
 	//start the client process
 	peer->Startup(1, &sd, 1);
@@ -158,7 +193,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for default\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.51");
+		strcpy(str, "172.16.2.64");
 	}
 
 	//ask for user to enter their username
@@ -354,21 +389,24 @@ int main(int const argc, char const* const argv[])
 					gpro_mancala board;
 					bool turn;
 					bool spectator;
+					int index;
 
 					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 					bsIn.Read(board);
 					bsIn.Read(turn);
 					bsIn.Read(spectator);
+					bsIn.Read(index);
 
 					isTurn = turn;
 					isSpectator = spectator;
+					playerIndex = index;
 
 					gameStarted = true;
 					printf("Game Started\n");
 
 					gpro_consoleClear();
 
-					printGameboard(board);
+					printGameboard(board, playerIndex);
 
 					if (isTurn)
 					{
@@ -391,7 +429,7 @@ int main(int const argc, char const* const argv[])
 
 					gpro_consoleClear();
 
-					printGameboard(board);
+					printGameboard(board, playerIndex);
 
 					if (isTurn)
 					{

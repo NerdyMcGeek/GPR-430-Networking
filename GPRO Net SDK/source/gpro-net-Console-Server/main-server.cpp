@@ -459,6 +459,10 @@ int main(int const argc, char const* const argv[])
 							bsOut.Write(it[0]->currentLobby->gameboard);
 							bsOut.Write(it[0]->currentLobby->users[j].turn);
 							bsOut.Write(it[0]->currentLobby->users[j].isSpectator);
+							if (packet->systemAddress == it[0]->currentLobby->users[j].address)
+								bsOut.Write(1);
+							else
+								bsOut.Write(0);
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
 							bsOut.Reset();
 						}
