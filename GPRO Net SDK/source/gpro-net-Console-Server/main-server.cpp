@@ -58,7 +58,8 @@ enum GameMessages
 	ID_LOBBY_SELECT,
 	ID_START_GAME,
 	ID_UPDATE_GAME,
-	ID_MOVE
+	ID_MOVE,
+	ID_GAME_OVER
 };
 
 struct ServerUser;
@@ -68,13 +69,14 @@ struct Lobby
 	std::vector<ServerUser> users;
 	int lobbyNumber;
 	bool started;
+	bool finished;
 	gpro_mancala gameboard;
 
-	Lobby() : lobbyNumber(-1), started(false) 
+	Lobby() : lobbyNumber(-1), started(false), finished(false)
 	{
 		gpro_mancala_reset(gameboard);
 	}
-	Lobby(int lobbyNumber) : lobbyNumber(lobbyNumber), started(false) 
+	Lobby(int lobbyNumber) : lobbyNumber(lobbyNumber), started(false), finished(false)
 	{
 		gpro_mancala_reset(gameboard);
 	}
@@ -88,6 +90,7 @@ struct ServerUser
 	Lobby* currentLobby;
 	bool isSpectator;
 	bool turn = false;
+	bool winner = false;
 
 	//when we construct a ServerUser, we must provide it a system address at least
 	ServerUser(RakNet::SystemAddress address) : address(address), id(-1), currentLobby(NULL), isSpectator(false) {}
@@ -520,22 +523,62 @@ int main(int const argc, char const* const argv[])
 						playAgain = true;
 					}
 
-					//change turn
-					Lobby * currentLobby = it[0]->currentLobby;
-
-					if (!playAgain)
+					//update side of board counts
+					for (size_t i = 0; i < 2; i++)
 					{
-						currentLobby->users[0].turn = !currentLobby->users[0].turn;
-						currentLobby->users[1].turn = !currentLobby->users[1].turn;
+						it[0]->currentLobby->gameboard[i][7] = 0;
+						for (size_t j = 1; j <= 6; j++)
+						{
+							it[0]->currentLobby->gameboard[i][7] += it[0]->currentLobby->gameboard[0][j];
+						}
 					}
 
-					for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
+					//check for and set winner
+					for (size_t i = 0; i < 2; i++)
 					{
-						RakNet::BitStream bsOut;
-						bsOut.Write((RakNet::MessageID)ID_UPDATE_GAME);
-						bsOut.Write(it[0]->currentLobby->gameboard);
-						bsOut.Write(it[0]->currentLobby->users[j].turn);
-						peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
+						if (it[0]->currentLobby->gameboard[i][7] <= 0)
+						{
+							it[0]->currentLobby->finished = true;
+							if (it[0]->currentLobby->gameboard[0][7] > it[0]->currentLobby->gameboard[1][7])
+							{
+								it[0]->currentLobby->users[0].winner = true;
+							}
+							else if (it[0]->currentLobby->gameboard[1][7] > it[0]->currentLobby->gameboard[0][7])
+							{
+								it[0]->currentLobby->users[1].winner = true;
+							}
+						}
+					}
+
+					if (!it[0]->currentLobby->finished)
+					{
+						//change turn
+						Lobby* currentLobby = it[0]->currentLobby;
+
+						if (!playAgain)
+						{
+							currentLobby->users[0].turn = !currentLobby->users[0].turn;
+							currentLobby->users[1].turn = !currentLobby->users[1].turn;
+						}
+
+						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
+						{
+							RakNet::BitStream bsOut;
+							bsOut.Write((RakNet::MessageID)ID_UPDATE_GAME);
+							bsOut.Write(it[0]->currentLobby->gameboard);
+							bsOut.Write(it[0]->currentLobby->users[j].turn);
+							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
+						}
+					}
+					else
+					{
+						//tell clients who won the game
+						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
+						{
+							RakNet::BitStream bsOut;
+							bsOut.Write((RakNet::MessageID)ID_GAME_OVER);
+							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
+						}
 					}
 
 					bufPtr = NULL;

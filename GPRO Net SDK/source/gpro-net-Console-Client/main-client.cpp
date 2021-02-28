@@ -59,7 +59,8 @@ enum GameMessages
 	ID_LOBBY_SELECT,
 	ID_START_GAME,
 	ID_UPDATE_GAME,
-	ID_MOVE
+	ID_MOVE,
+	ID_GAME_OVER
 };
 
 void printGameboard(gpro_mancala board, int playerIndex, std::string player0Name, std::string player1Name)
@@ -452,6 +453,11 @@ int main(int const argc, char const* const argv[])
 					}
 
 					bufPtr = NULL;
+				}
+				break;
+				case ID_GAME_OVER:
+				{
+
 				}
 				break;
 				default:
