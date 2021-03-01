@@ -490,7 +490,7 @@ int main(int const argc, char const* const argv[])
 					
 					std::vector<ServerUser*>::iterator it = std::find_if(users.begin(), users.end(), ServerUser(packet->systemAddress));
 
-					bool playerTurn;	//this might be fucky depending on which player
+					bool playerTurn;
 					if (it[0]->currentLobby->users[0].turn)
 						playerTurn = 0;
 					else if (it[0]->currentLobby->users[1].turn)
@@ -510,8 +510,9 @@ int main(int const argc, char const* const argv[])
 						{
 							currentIndex = 6;
 							currentSide = !currentSide;
+							it[0]->currentLobby->gameboard[currentSide][currentIndex] += 1;
 						}
-						if (currentIndex <= 6)
+						else if (currentIndex <= 6)
 						{
 							currentIndex -= 1;
 							it[0]->currentLobby->gameboard[currentSide][currentIndex] += 1;
