@@ -1,8 +1,0 @@
-On the second player, when they click on a pocket, the click is "mirrored" on the server
-meaning that it is on the same side of the board but opposite position. It could
-either be something weird with the way we are reading in click position though I
-kinda doubt that. It could also be an issue with something in the game logic.
-Possibly that it is not moving counterclockwise correctly.
-
-I've also noticed that the stones do not wrap correctly. I wonder if the board is 
-set up wrong.

@@ -72,12 +72,12 @@ void printGameboard(gpro_mancala board, int playerIndex, std::string player0Name
 		printf(" _______________________________________ \n");
 
 		printf("| %u  ", board[1][0]);
-		printf("| %u  ", board[1][6]);
-		printf("| %u  ", board[1][5]);
-		printf("| %u  ", board[1][4]);
-		printf("| %u  ", board[1][3]);
+		printf("| %u  ", board[1][1]);
 		printf("| %u  ", board[1][2]);
-		printf("| %u  |", board[1][1]);
+		printf("| %u  ", board[1][3]);
+		printf("| %u  ", board[1][4]);
+		printf("| %u  ", board[1][5]);
+		printf("| %u  |", board[1][6]);
 		printf("    |\n");
 
 		printf("|    |____|____|____|____|____|____|    |\n");
@@ -113,12 +113,12 @@ void printGameboard(gpro_mancala board, int playerIndex, std::string player0Name
 		printf("|    |____|____|____|____|____|____|    |\n");
 
 		printf("|    ");
-		printf("| %u  ", board[1][1]);
-		printf("| %u  ", board[1][2]);
-		printf("| %u  ", board[1][3]);
-		printf("| %u  ", board[1][4]);
-		printf("| %u  ", board[1][5]);
 		printf("| %u  ", board[1][6]);
+		printf("| %u  ", board[1][5]);
+		printf("| %u  ", board[1][4]);
+		printf("| %u  ", board[1][3]);
+		printf("| %u  ", board[1][2]);
+		printf("| %u  ", board[1][1]);
 		printf("| %u  |\n", board[1][0]);
 
 		printf("|____|____|____|____|____|____|____|____|\n");
@@ -203,7 +203,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for default\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.64");
+		strcpy(str, "172.16.2.57");
 	}
 
 	//ask for user to enter their username
