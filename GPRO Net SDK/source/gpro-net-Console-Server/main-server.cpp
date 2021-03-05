@@ -457,16 +457,13 @@ int main(int const argc, char const* const argv[])
 
 						RakNet::BitStream bsOut;
 
-						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
+						for (int j = 0; j < it[0]->currentLobby->users.size(); j++)
 						{
 							bsOut.Write((RakNet::MessageID)ID_START_GAME);
 							bsOut.Write(it[0]->currentLobby->gameboard);
 							bsOut.Write(it[0]->currentLobby->users[j].turn);
 							bsOut.Write(it[0]->currentLobby->users[j].isSpectator);
-							if (packet->systemAddress == it[0]->currentLobby->users[j].address)
-								bsOut.Write(1);
-							else
-								bsOut.Write(0);
+							bsOut.Write(j);
 							bsOut.Write(it[0]->currentLobby->users[0].username);
 							bsOut.Write(it[0]->currentLobby->users[1].username);
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
