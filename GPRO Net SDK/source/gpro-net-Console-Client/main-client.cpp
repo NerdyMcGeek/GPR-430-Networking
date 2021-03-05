@@ -189,6 +189,7 @@ int main(int const argc, char const* const argv[])
 
 	//game logic
 	bool gameStarted = false;
+	bool gameOver = false;
 	bool isTurn = false;
 	bool isSpectator = false;
 	int playerIndex = -1;
@@ -203,7 +204,7 @@ int main(int const argc, char const* const argv[])
 	printf("Enter server IP or hit enter for default\n");
 	gets_s(str);
 	if (str[0] == 0) {
-		strcpy(str, "172.16.2.57");
+		strcpy(str, "172.16.2.56");
 	}
 
 	//ask for user to enter their username
@@ -457,7 +458,18 @@ int main(int const argc, char const* const argv[])
 				break;
 				case ID_GAME_OVER:
 				{
+					RakNet::RakString winner;
 
+					bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+					bsIn.Read(winner);
+
+					printf("\n%s won the game!\n", winner.C_String());
+
+					gameOver = true;
+
+					bufPtr = NULL;
+
+					running = false;
 				}
 				break;
 				default:
@@ -468,7 +480,7 @@ int main(int const argc, char const* const argv[])
 		}
 
 		//should be able to use something like this to get mouse click location
-		if (window == GetForegroundWindow() && gameStarted && !isSpectator && isTurn)
+		if (window == GetForegroundWindow() && gameStarted && !gameOver && !isSpectator && isTurn)
 		{
 			//get coordinate of current selection
 			short cursorX = selectionInfo.dwSelectionAnchor.X;

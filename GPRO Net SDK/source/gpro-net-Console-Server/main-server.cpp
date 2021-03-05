@@ -551,6 +551,10 @@ int main(int const argc, char const* const argv[])
 						}
 					}
 
+					/* Uncomment to instantly win */
+					/*it[0]->currentLobby->finished = true;
+					it[0]->currentLobby->users[0].winner = true;*/
+
 					if (!it[0]->currentLobby->finished)
 					{
 						//change turn
@@ -573,11 +577,21 @@ int main(int const argc, char const* const argv[])
 					}
 					else
 					{
+						RakNet::RakString winner;
+						//figure out the winner 
+						for (size_t i = 0; i < it[0]->currentLobby->users.size(); i++)
+						{
+							if (it[0]->currentLobby->users[i].winner)
+							{
+								winner = it[0]->currentLobby->users[i].username;
+							}
+						}
 						//tell clients who won the game
 						for (size_t j = 0; j < it[0]->currentLobby->users.size(); j++)
 						{
 							RakNet::BitStream bsOut;
 							bsOut.Write((RakNet::MessageID)ID_GAME_OVER);
+							bsOut.Write(winner);
 							peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, it[0]->currentLobby->users[j].address, false);
 						}
 					}
@@ -591,15 +605,6 @@ int main(int const argc, char const* const argv[])
 				}
 			}
 		}
-		
-		//for (size_t i = 0; i < lobbies.size(); i++)
-		//{
-		//	//Game Logic
-		//	if (lobbies[i]->started)
-		//	{
-
-		//	}
-		//}
 	}
 
 	//shut down server
