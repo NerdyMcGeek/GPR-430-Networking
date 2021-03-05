@@ -63,6 +63,7 @@ enum GameMessages
 	ID_GAME_OVER
 };
 
+//prints out the mancala "board", and makes sure that it is displaying the correct direction for each player
 void printGameboard(gpro_mancala board, int playerIndex, std::string player0Name, std::string player1Name)
 {
 	if (playerIndex == 0)
@@ -187,7 +188,7 @@ int main(int const argc, char const* const argv[])
 
 	CONSOLE_SELECTION_INFO selectionInfo;
 
-	//game logic
+	//used in game logic
 	bool gameStarted = false;
 	bool gameOver = false;
 	bool isTurn = false;
@@ -395,6 +396,7 @@ int main(int const argc, char const* const argv[])
 					bufPtr = NULL;
 				}
 				break;
+				//sets up the game
 				case ID_START_GAME:
 				{
 					gpro_mancala board;
@@ -433,6 +435,7 @@ int main(int const argc, char const* const argv[])
 					bufPtr = NULL;
 				}
 				break;
+				//updates the game board
 				case ID_UPDATE_GAME:
 				{
 					gpro_mancala board;
@@ -456,6 +459,7 @@ int main(int const argc, char const* const argv[])
 					bufPtr = NULL;
 				}
 				break;
+				//declares a winner and finishes the game
 				case ID_GAME_OVER:
 				{
 					RakNet::RakString winner;
@@ -479,7 +483,7 @@ int main(int const argc, char const* const argv[])
 			}
 		}
 
-		//should be able to use something like this to get mouse click location
+		//get mouse click location and send which "cup" it clicked on
 		if (window == GetForegroundWindow() && gameStarted && !gameOver && !isSpectator && isTurn)
 		{
 			//get coordinate of current selection

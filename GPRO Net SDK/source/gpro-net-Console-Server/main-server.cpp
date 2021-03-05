@@ -359,6 +359,7 @@ int main(int const argc, char const* const argv[])
 					bufPtr = NULL;
 				}
 				break;
+				//sorts users into selected lobby
 				case ID_LOBBY_SELECT:
 				{
 					char ri[2];
@@ -476,6 +477,7 @@ int main(int const argc, char const* const argv[])
 					bufPtr = NULL;
 				}
 				break;
+				//runs the game logic every time a player makes their move
 				case ID_MOVE:
 				{
 					gpro_mancala_index index;
