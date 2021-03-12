@@ -85,6 +85,15 @@ int main(int const argc, char const* const argv[])
 	while (1)
 	{
 		client.MessageLoop();
+		//ask user for ip adress input for master server
+		//try to connect to that ip
+		//if correct connect to master server
+			//Message::Connection Successful
+				//display messages from server
+			//Message::QuitGame
+				//leave sub-server and connect to Master server again
+			//Message::ShutDown
+				//leave sub-server and main server and close console
 	}
 
 	printf("\n\n");
