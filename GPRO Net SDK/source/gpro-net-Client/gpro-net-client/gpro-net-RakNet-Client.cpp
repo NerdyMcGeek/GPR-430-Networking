@@ -23,14 +23,16 @@
 */
 
 #include "gpro-net/gpro-net-client/gpro-net-RakNet-Client.hpp"
-
+#include <iostream>
 
 namespace gproNet
 {
+
+
 	cRakNetClient::cRakNetClient()
 	{
 		RakNet::SocketDescriptor sd;
-		char SERVER_IP[16] = "127.0.0.1";
+		char SERVER_IP[16] = "172.16.2.56";
 
 		peer->Startup(1, &sd, 1);
 		peer->SetMaximumIncomingConnections(0);
@@ -84,6 +86,22 @@ namespace gproNet
 			ReadTest(bitstream);
 		}	return true;
 
+		case ID_GPRO_MESSAGE_SERVER_LIST:
+		{
+			//read server number request from server
+			ReadAndPrint(bitstream);
+
+			//get server number the client wants to connect to
+			int serverNum;
+			std::cin >> serverNum;
+
+			//send server number to server to get corresponding address
+			RakNet::BitStream bitstream_w;
+			Write(ID_GPRO_MESSAGE_SERVER_ADDRESS_REQUEST, bitstream_w, serverNum);
+			peer->Send(&bitstream_w, MEDIUM_PRIORITY, UNRELIABLE_SEQUENCED, 0, sender, false);
+
+			
+		}	return true;
 		}
 		return false;
 	}

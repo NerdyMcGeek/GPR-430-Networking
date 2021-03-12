@@ -82,6 +82,44 @@ namespace gproNet
 		return bitstream;
 	}
 
+	RakNet::BitStream& cRakNetManager::Write(RakNet::MessageID msgID, RakNet::BitStream& bitstream, char const message[])
+	{
+		WriteTimestamp(bitstream);
+		bitstream.Write(msgID);
+		bitstream.Write(message);
+		return bitstream;
+	}
+
+	RakNet::BitStream& cRakNetManager::Write(RakNet::MessageID msgID, RakNet::BitStream& bitstream, int const message)
+	{
+		WriteTimestamp(bitstream);
+		bitstream.Write(msgID);
+		bitstream.Write(message);
+		return bitstream;
+	}
+
+	RakNet::RakString cRakNetManager::Read(RakNet::BitStream& bitstream)
+	{
+		RakNet::RakString rs;
+		bitstream.Read(rs);
+		return rs;
+	}
+
+	int cRakNetManager::GetInt(RakNet::BitStream& bitstream)
+	{
+		int rs;
+		bitstream.Read(rs);
+		return rs;
+	}
+
+	RakNet::BitStream& cRakNetManager::ReadAndPrint(RakNet::BitStream& bitstream)
+	{
+		RakNet::RakString rs;
+		bitstream.Read(rs);
+		printf("%s\n", rs.C_String());
+		return bitstream;
+	}
+
 	int cRakNetManager::MessageLoop()
 	{
 		int count = 0;

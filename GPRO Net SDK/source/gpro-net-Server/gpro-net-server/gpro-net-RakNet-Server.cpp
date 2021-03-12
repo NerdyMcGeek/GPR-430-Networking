@@ -23,10 +23,13 @@
 */
 
 #include "gpro-net/gpro-net-server/gpro-net-RakNet-Server.hpp"
+#include <vector>
 
 
 namespace gproNet
 {
+	std::vector<RakNet::SystemAddress*> gameServerList;
+
 	cRakNetServer::cRakNetServer()
 	{
 		RakNet::SocketDescriptor sd(SET_GPRO_SERVER_PORT, 0);
@@ -34,6 +37,12 @@ namespace gproNet
 
 		peer->Startup(MAX_CLIENTS, &sd, 1);
 		peer->SetMaximumIncomingConnections(MAX_CLIENTS);
+
+		gameServerList.push_back(new RakNet::SystemAddress());
+		gameServerList.push_back(new RakNet::SystemAddress());
+		gameServerList.push_back(new RakNet::SystemAddress());
+		gameServerList.push_back(new RakNet::SystemAddress());
+		gameServerList.push_back(new RakNet::SystemAddress());
 	}
 
 	cRakNetServer::~cRakNetServer()
@@ -67,9 +76,25 @@ namespace gproNet
 		{
 			// server receives greeting, print it and send one back
 			RakNet::BitStream bitstream_w;
+			RakNet::BitStream serverList;
 			ReadTest(bitstream);
 			WriteTest(bitstream_w, "Hello client from server");
 			peer->Send(&bitstream_w, MEDIUM_PRIORITY, UNRELIABLE_SEQUENCED, 0, sender, false);
+			Write((RakNet::MessageID)ID_GPRO_MESSAGE_SERVER_LIST, serverList, "Enter server number to join:");
+			peer->Send(&serverList, MEDIUM_PRIORITY, UNRELIABLE_SEQUENCED, 0, sender, false);
+		}	return true;
+
+		case ID_GPRO_MESSAGE_SERVER_ADDRESS_REQUEST:
+		{
+			//read server number from bitstream
+			int serverNum = GetInt(bitstream);
+			
+			//locate corresonding server address
+			RakNet::SystemAddress gameServerAddress = *gameServerList[serverNum - 1];
+
+			//send requested server address to client
+			RakNet::BitStream bitstream_w; //NOTE: This is where I stopped when I ran out of time
+
 		}	return true;
 
 		}

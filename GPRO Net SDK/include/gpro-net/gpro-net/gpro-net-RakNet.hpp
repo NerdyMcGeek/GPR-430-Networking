@@ -53,8 +53,8 @@ namespace gproNet
 	enum eMessageCommon
 	{
 		ID_GPRO_MESSAGE_COMMON_BEGIN = ID_USER_PACKET_ENUM,
-
-
+		ID_GPRO_MESSAGE_SERVER_LIST,
+		ID_GPRO_MESSAGE_SERVER_ADDRESS_REQUEST,
 
 		ID_GPRO_MESSAGE_COMMON_END
 	};
@@ -112,6 +112,19 @@ namespace gproNet
 		//		param bitstream: packet data in bitstream
 		//		return: bitstream
 		RakNet::BitStream& ReadTest(RakNet::BitStream& bitstream);
+
+		// Generic Writes
+		RakNet::BitStream& Write(RakNet::MessageID msgID, RakNet::BitStream& bitstream, char const message[]);
+		RakNet::BitStream& Write(RakNet::MessageID msgID, RakNet::BitStream& bitstream, int const message);
+
+		// Generic Read
+		RakNet::RakString Read(RakNet::BitStream& bitstream);
+		
+		// Generic Read then Print
+		RakNet::BitStream& ReadAndPrint(RakNet::BitStream& bitstream);
+
+		// Read and return int value
+		int GetInt(RakNet::BitStream& bitstream);
 
 		// public methods
 	public:
